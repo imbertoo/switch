@@ -1,15 +1,13 @@
 <?php
 session_start();
-require_once 'db_connect.php'; // Archivo para conectar a la base de datos
+require_once 'db_connect.php'; 
 
-// Verificar si el formulario de inicio de sesión fue enviado
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $login = $_POST['login']; // Cambiado para capturar tanto correo como nombre de usuario
+    $login = $_POST['login']; 
     $password = $_POST['password'];
 
-    // Preparar la consulta para verificar al usuario
     $query = $conn->prepare("SELECT id, username, email, password FROM users WHERE username = ? OR email = ?");
-    $query->bind_param("ss", $login, $login); // Verificamos ambos, username y email
+    $query->bind_param("ss", $login, $login); 
     $query->execute();
     $result = $query->get_result();
 
@@ -40,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Switch</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Incluye tus estilos aquí -->
+    <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
     <div class="login-container">
@@ -52,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <form method="POST" action="index.php">
             <label for="login">Nombre de Usuario o Correo Electrónico:</label>
-            <input type="text" name="login" id="login" required> <!-- Cambiado para permitir ambos -->
+            <input type="text" name="login" id="login" required>
             
             <label for="password">Contraseña:</label>
             <input type="password" name="password" id="password" required>

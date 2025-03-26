@@ -1,15 +1,13 @@
 <?php
 session_start();
-require_once 'db_connect.php'; // Archivo para conectar a la base de datos
+require_once 'db_connect.php'; 
 
 
-// Verificar si el usuario está conectado
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
 }
 
-// Obtener el ID del usuario
 $userId = $_SESSION['user_id'];
 
 // Manejar el envío de comentarios
@@ -95,7 +93,7 @@ $recommendedQuery->execute();
 $recommendedResult = $recommendedQuery->get_result();
 
 
-// Obtener publicaciones del usuario y de sus amigos
+// Obtener publicaciones del usuario y de las cuentas que sigue
 $query = $conn->prepare("
     SELECT posts.id, posts.content, posts.created_at, users.username, users.profile_picture, posts.user_id, posts.image_url, posts.video_url,
            (SELECT COUNT(*) FROM likes WHERE post_id = posts.id) AS like_count
@@ -142,7 +140,6 @@ $chatUsersResult = $chatUsersQuery->get_result();
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
-        /* Estilos para el chat */
         .chat-panel {
             position: fixed;
             bottom: 0;
@@ -174,7 +171,7 @@ $chatUsersResult = $chatUsersQuery->get_result();
             padding: 15px;
             display: flex;
             flex-direction: column;
-            height: calc(100% - 110px); /* Altura total menos header y footer */
+            height: calc(100% - 110px); 
         }
         .chat-footer {
             padding: 10px;
@@ -226,7 +223,7 @@ $chatUsersResult = $chatUsersQuery->get_result();
         .user-list {
             max-height: 100%;
             overflow-y: auto;
-            height: calc(100% - 50px); /* Altura total menos header */
+            height: calc(100% - 50px); 
         }
         .user-item {
             padding: 10px;
@@ -261,7 +258,6 @@ $chatUsersResult = $chatUsersQuery->get_result();
         .chat-button {
             position: relative;
         }
-        /* Animación para el botón de chat */
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -271,7 +267,6 @@ $chatUsersResult = $chatUsersQuery->get_result();
             animation: pulse 1.5s infinite;
         }
         
-        /* Estilos para el botón de volver */
         #backButton {
             margin-right: 10px;
             padding: 2px 8px;
@@ -283,13 +278,11 @@ $chatUsersResult = $chatUsersQuery->get_result();
             background-color: rgba(255, 255, 255, 0.2);
         }
         
-        /* Ajuste para el título del chat */
         #chatHeaderTitle {
             display: flex;
             align-items: center;
         }
         
-        /* Animación para el botón de volver */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -307,7 +300,6 @@ $chatUsersResult = $chatUsersQuery->get_result();
             <button onclick="location.href='feed.php'">Feed</button>
             <button onclick="location.href='upload.php'">Subir publicación</button>
             <button onclick="location.href='profile.php'">Mi Perfil</button>
-            <!-- Botón de chat con ícono -->
             <button id="chatButton" class="chat-button">
                 <i class="fas fa-comments"></i> Chat
                 <span id="unreadBadge" class="chat-badge" style="display: none;">0</span>
@@ -318,13 +310,11 @@ $chatUsersResult = $chatUsersQuery->get_result();
         <div class="main-content">
         <header>
             <div class="user-info">
-                <!-- Envolver la imagen y el nombre en un enlace -->
                 <a href="profile.php?user_id=<?= $userId ?>">
                     <img src="<?= $userData['profile_picture'] ?>" alt="Perfil" class="profile-img" width="50" height="50">
                     <span><?= $userData['username'] ?></span>
                 </a>
             </div>
-            <!-- Barra de búsqueda -->
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Buscar usuarios..." onkeyup="searchUsers()">
                 <div id="searchResults" class="search-results" style="display: none;"></div>
@@ -340,13 +330,11 @@ $chatUsersResult = $chatUsersQuery->get_result();
                                 <h4><a href="profile.php?user_id=<?= $post['user_id'] ?>" style="text-decoration: none; color: inherit;"><?= $post['username'] ?></a></h4>
                                 <p><?= $post['content'] ?></p>
                                 
-                                <!-- Mostrar la imagen del post si existe -->
                                 <?php if (!empty($post['image_url'])): ?>
                                     <img src="<?= $post['image_url'] ?>" alt="Imagen de la publicación" class="post-image" height="250px" width="250px" style="max-width: 100%; height: auto;">
                                     <br>
                                     <?php endif; ?>
 
-                                <!-- Mostrar el video del post solo si existe -->
                                 <?php if (!empty($post['video_url'])): ?>
                                     <video controls style="max-width: 100%; height: auto;">
                                         <source src="<?= htmlspecialchars($post['video_url'], ENT_QUOTES) ?>" type="video/mp4">
@@ -354,7 +342,6 @@ $chatUsersResult = $chatUsersQuery->get_result();
                                     </video>
                                     <br>
                                 <?php else: ?>
-                                    <!-- No mostrar nada si no hay video -->
                                 <?php endif; ?>
 
                                 <span class="post-date"><?= $post['created_at'] ?></span>
@@ -474,7 +461,7 @@ $chatUsersResult = $chatUsersQuery->get_result();
         
         <!-- Área de mensajes -->
         <div id="chatBody" class="chat-body" style="display: none;">
-            <!-- Los mensajes se cargarán aquí dinámicamente -->
+
         </div>
         
         <!-- Formulario para enviar mensajes -->
@@ -525,7 +512,6 @@ $chatUsersResult = $chatUsersQuery->get_result();
 
         // Inicializar WebSocket
         function initWebSocket() {
-            // Usar la dirección IP o nombre de host específico en lugar de window.location.hostname
             const wsUrl = 'ws://localhost:8080';
             
             console.log('Conectando a WebSocket en:', wsUrl);

@@ -1,8 +1,7 @@
 <?php
 session_start();
-require_once 'db_connect.php'; // Archivo para conectar a la base de datos
+require_once 'db_connect.php'; 
 
-// Verificar si el formulario de registro fue enviado
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $email = $_POST['email'];
@@ -41,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse - Switch</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Puedes incluir tus estilos aquí -->
+    <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
     <div class="register-container">

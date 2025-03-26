@@ -1,8 +1,7 @@
 <?php 
 session_start();
-require_once 'db_connect.php'; // Archivo para conectar a la base de datos
+require_once 'db_connect.php';
 
-// Verificar si el usuario está conectado
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
@@ -153,7 +152,6 @@ if (isset($_GET['delete_comment_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
-        /* Estilos adicionales para el perfil */
         .profile-header {
             display: flex;
             align-items: center;
@@ -285,7 +283,6 @@ if (isset($_GET['delete_comment_id'])) {
             font-size: 0.8rem;
         }
         
-        /* Estilos para dispositivos móviles */
         @media (max-width: 768px) {
             .profile-header {
                 flex-direction: column;
@@ -310,7 +307,6 @@ if (isset($_GET['delete_comment_id'])) {
             <button onclick="location.href='feed.php'">Feed</button>
             <button onclick="location.href='upload.php'">Subir publicación</button>
             <button onclick="location.href='profile.php'">Mi Perfil</button>
-            <!-- Botón de chat con ícono -->
             <button id="chatButton" class="chat-button" onclick="location.href='dashboard.php'">
                 <i class="fas fa-comments"></i> Chat
             </button>

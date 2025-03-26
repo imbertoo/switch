@@ -1,8 +1,7 @@
 <?php
 session_start();
-require_once 'db_connect.php'; // Conexión a la base de datos
+require_once 'db_connect.php'; 
 
-// Verificar si el usuario está conectado
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
@@ -18,7 +17,7 @@ $likeCheckQuery->bind_param("ii", $postId, $currentUserId);
 $likeCheckQuery->execute();
 
 if ($likeCheckQuery->get_result()->num_rows == 0) {
-    // Insertar el like en la base de dato
+    // Insertar el like en la base de datos
     $insertLikeQuery = $conn->prepare("INSERT INTO likes (post_id, user_id) VALUES (?, ?)");
     $insertLikeQuery->bind_param("ii", $postId, $currentUserId);
     $insertLikeQuery->execute();

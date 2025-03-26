@@ -1,14 +1,12 @@
 <?php
 session_start();
-require_once 'db_connect.php'; // Archivo para conectar a la base de datos
+require_once 'db_connect.php'; 
 
-// Verificar si el usuario está conectado
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
 }
 
-// Obtener el ID del usuario
 $userId = $_SESSION['user_id'];
 
 // Obtener todas las acciones recientes (likes, comentarios y nuevos seguidores)

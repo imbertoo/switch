@@ -1,27 +1,24 @@
 <?php
-// Iniciar sesión para verificar que el usuario está autenticado
 session_start();
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['user_id'])) {
-    // Redirigir al login si no está autenticado
     header('Location: login.php');
     exit;
 }
 
-// Obtener información del usuario actual
 $userId = $_SESSION['user_id'];
 $username = $_SESSION['username'] ?? 'Usuario';
 
-// Incluir el archivo de conexión a la base de datos
 require_once 'db_connect.php';
-// Asumiendo que bd.php define una variable $conn con la conexión PDO
 
-// Obtener todos los usuarios excepto el actual
 try {
     $stmt = $conn->prepare("SELECT id, username FROM users WHERE id != ?");
     $stmt->execute([$userId]);
-    $users = $stmt->fetchAll();
+    $users = [];
+    $stmt->bind_result($id, $username);
+    while ($stmt->fetch()) {
+        $users[] = ['id' => $id, 'username' => $username];
+    }
 } catch (PDOException $e) {
     die("Error de conexión a la base de datos: " . $e->getMessage());
 }
@@ -123,18 +120,15 @@ try {
         </div>
         
         <div class="chat-container">
-            <!-- Lista de usuarios -->
             <div class="user-list" id="userList">
                 <div class="p-3 bg-light">
                     <h5>Usuarios</h5>
                 </div>
                 <div id="userListItems">
-                    <!-- Los usuarios se cargarán dinámicamente aquí -->
                     <div class="text-center p-3">Cargando usuarios...</div>
                 </div>
             </div>
             
-            <!-- Área de chat -->
             <div class="chat-area">
                 <div id="messageContainer" class="message-container">
                     <div class="no-chat-selected">
@@ -152,34 +146,26 @@ try {
         </div>
     </div>
 
-    <!-- JavaScript para manejar el WebSocket y la interfaz de chat -->
     <script>
-        // Datos del usuario actual
         const currentUserId = <?php echo $userId; ?>;
         const sessionId = "<?php echo session_id(); ?>";
         
-        // Variables para el chat
         let socket;
         let selectedUserId = null;
         let users = [];
         
-        // Elementos del DOM
         const userListItems = document.getElementById('userListItems');
         const messageContainer = document.getElementById('messageContainer');
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
         
-        // Inicializar la conexión WebSocket
         function initWebSocket() {
-            // Crear una nueva conexión WebSocket
             socket = new WebSocket('ws://localhost:8080');
             
-            // Evento cuando se abre la conexión
             socket.onopen = function(event) {
                 console.log('Conexión WebSocket establecida');
                 
-                // Autenticar al usuario
                 sendToServer({
                     type: 'auth',
                     user_id: currentUserId,
@@ -187,36 +173,29 @@ try {
                 });
             };
             
-            // Evento cuando se recibe un mensaje
             socket.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 console.log('Mensaje recibido:', data);
                 
-                // Manejar diferentes tipos de mensajes
                 switch (data.type) {
                     case 'auth_success':
-                        // Autenticación exitosa, solicitar lista de usuarios
                         sendToServer({ type: 'get_users' });
                         break;
                         
                     case 'user_list':
-                        // Actualizar la lista de usuarios
                         users = data.users;
                         renderUserList();
                         break;
                         
                     case 'user_status':
-                        // Actualizar el estado de un usuario
                         updateUserStatus(data.user_id, data.online);
                         break;
                         
                     case 'chat_history':
-                        // Mostrar el historial de chat
                         renderChatHistory(data.messages);
                         break;
                         
                     case 'new_message':
-                        // Mostrar un nuevo mensaje
                         if (
                             (data.sender_id === currentUserId && data.receiver_id === selectedUserId) ||
                             (data.sender_id === selectedUserId && data.receiver_id === currentUserId)
@@ -224,34 +203,28 @@ try {
                             appendMessage(data);
                         }
                         
-                        // Si el mensaje es de alguien con quien no estamos chateando, actualizar indicador
                         if (data.sender_id !== currentUserId && data.sender_id !== selectedUserId) {
                             markUserWithUnreadMessage(data.sender_id);
                         }
                         break;
                         
                     case 'unread_messages':
-                        // Procesar mensajes no leídos
                         processUnreadMessages(data.messages);
                         break;
                         
                     case 'error':
-                        // Mostrar error
                         console.error('Error del servidor:', data.message);
                         break;
                 }
             };
             
-            // Evento cuando ocurre un error
             socket.onerror = function(error) {
                 console.error('Error de WebSocket:', error);
             };
             
-            // Evento cuando se cierra la conexión
             socket.onclose = function(event) {
                 console.log('Conexión WebSocket cerrada');
                 
-                // Intentar reconectar después de un tiempo
                 setTimeout(function() {
                     console.log('Intentando reconectar...');
                     initWebSocket();
@@ -259,7 +232,6 @@ try {
             };
         }
         
-        // Enviar datos al servidor WebSocket
         function sendToServer(data) {
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(data));
@@ -268,7 +240,6 @@ try {
             }
         }
         
-        // Renderizar la lista de usuarios
         function renderUserList() {
             userListItems.innerHTML = '';
             
@@ -302,43 +273,35 @@ try {
             });
         }
         
-        // Seleccionar un usuario para chatear
         function selectUser(userId) {
-            // Deseleccionar el usuario anterior
             const previousUserItem = document.querySelector(`.user-item.active`);
             if (previousUserItem) {
                 previousUserItem.classList.remove('active');
             }
             
-            // Seleccionar el nuevo usuario
             selectedUserId = userId;
             const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
             if (userItem) {
                 userItem.classList.add('active');
                 
-                // Ocultar el badge de mensajes no leídos
                 const unreadBadge = userItem.querySelector('.unread-badge');
                 if (unreadBadge) {
                     unreadBadge.style.display = 'none';
                 }
             }
             
-            // Habilitar el campo de entrada de mensajes
             messageInput.disabled = false;
             sendButton.disabled = false;
             messageInput.focus();
             
-            // Limpiar el contenedor de mensajes
             messageContainer.innerHTML = '<div class="text-center p-3">Cargando mensajes...</div>';
             
-            // Solicitar el historial de chat
             sendToServer({
                 type: 'get_history',
                 other_user_id: userId
             });
         }
         
-        // Actualizar el estado de un usuario (en línea/desconectado)
         function updateUserStatus(userId, online) {
             const user = users.find(u => u.id === userId);
             if (user) {
@@ -354,7 +317,6 @@ try {
             }
         }
         
-        // Renderizar el historial de chat
         function renderChatHistory(messages) {
             messageContainer.innerHTML = '';
             
@@ -367,17 +329,14 @@ try {
                 appendMessage(message);
             });
             
-            // Desplazarse al último mensaje
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
         
-        // Añadir un mensaje al contenedor
         function appendMessage(message) {
             const isSent = message.sender_id === currentUserId;
             const messageElement = document.createElement('div');
             messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
             
-            // Formatear la fecha
             const timestamp = new Date(message.timestamp);
             const formattedTime = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
@@ -388,13 +347,10 @@ try {
             
             messageContainer.appendChild(messageElement);
             
-            // Desplazarse al último mensaje
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
         
-        // Procesar mensajes no leídos
         function processUnreadMessages(messages) {
-            // Agrupar mensajes por remitente
             const messagesBySender = {};
             
             messages.forEach(message => {
@@ -407,13 +363,11 @@ try {
                 messagesBySender[senderId].push(message);
             });
             
-            // Actualizar los badges de mensajes no leídos
             for (const senderId in messagesBySender) {
                 markUserWithUnreadMessage(senderId, messagesBySender[senderId].length);
             }
         }
         
-        // Marcar un usuario con mensajes no leídos
         function markUserWithUnreadMessage(userId, count = 1) {
             const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
             if (userItem) {
@@ -426,14 +380,12 @@ try {
             }
         }
         
-        // Escapar HTML para prevenir XSS
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
         
-        // Manejar el envío de mensajes
         messageForm.addEventListener('submit', function(event) {
             event.preventDefault();
             
@@ -442,19 +394,16 @@ try {
                 return;
             }
             
-            // Enviar el mensaje al servidor
             sendToServer({
                 type: 'message',
                 receiver_id: selectedUserId,
                 message: message
             });
             
-            // Limpiar el campo de entrada
             messageInput.value = '';
             messageInput.focus();
         });
         
-        // Iniciar la conexión WebSocket cuando se carga la página
         document.addEventListener('DOMContentLoaded', function() {
             initWebSocket();
         });
