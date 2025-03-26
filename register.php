@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="register-container">
-    <img src="logo.png" alt="Logo de ShareMyGym" class="logo" width="220px" height="220px" style="display: block; margin: 0 auto;"> <!-- Logo -->
+    <img src="logo.png" alt="Logo de ShareMyGym" class="logo" width="280px" height="220px" style="display: block; margin: 0 auto;"> <!-- Logo -->
         <h2>Registrarse</h2>
         
         <?php if (!empty($error)) { ?>
