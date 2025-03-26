@@ -1,0 +1,325 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: white(0, 0%, 96%);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+.container, .profile-container, .register-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    height: 100vh;
+    width: 100vw;
+}
+
+.sidebar {
+    background-color: #333;
+    color: white;
+    width: 200px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 16px;
+}
+
+.sidebar button:hover {
+    background-color: #444;
+}
+
+.main-content, .profile-container, .container {
+    margin-left: 220px;
+    padding: 20px;
+    flex-grow: 1;
+    max-width: calc(100% - 220px);
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+input[type="text"], input[type="email"], input[type="password"], textarea {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px;
+    background-color: #ff9900;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e68a00;
+}
+
+.error {
+    color: red;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-img {
+    margin-right: 20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f5f5f5;
+}
+
+.profile-info h2 {
+    margin-bottom: 10px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.post {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.post-profile-img {
+    width: 40px;          /* Ajusta el ancho de la imagen */
+    height: 40px;         /* Ajusta la altura de la imagen */
+    border-radius: 50%;   /* Esto hará que la imagen tenga forma de círculo */
+    object-fit: cover;    /* Esto asegura que la imagen se recorte adecuadamente */
+    border: 3px solid #f5f5f5;
+}
+
+
+.post img, .post video {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+}
+
+/* Uniform size for user profile images in posts/feed */
+.user-info img, .profile-posts img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+}
+
+.no-activity, .no-posts {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 100px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    text-align: left;
+}
+
+.dropdown-content a {
+    padding: 10px;
+    text-decoration: none;
+    display: block;
+    color: black;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .main-content, .profile-container, .container {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 10px;
+    }
+
+    .sidebar {
+        display: none;
+    }
+}
+
+.post-content button {
+    margin-left: 10px; /* Espaciado entre el contenido y el botón */
+}
+
+.comment-profile-img {
+    border-radius: 50%; /* Hace que la imagen sea circular */
+    object-fit: cover; /* Asegura que la imagen se recorte adecuadamente */
+    margin-right: 10px; /* Espaciado entre la imagen y el nombre */
+}
+
+.feed-and-recommendations {
+    display: flex;
+    justify-content: center; /* Centra el contenido horizontalmente */
+    gap: 20px; /* Espaciado entre el feed y las recomendaciones */
+    margin-top: 20px;
+}
+
+.feed {
+    flex-grow: 1;
+    max-width: 600px; /* Define el ancho máximo del feed */
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
+.recommended-profiles {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin-top: 20px;
+    max-width: 300px; /* Controla el ancho del contenedor */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espaciado entre los perfiles */
+    height: auto; /* Ajusta la altura al contenido */
+}
+
+
+.recommended-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaciado entre imagen y nombre */
+    padding: 10px 0; /* Espaciado interno */
+    border-bottom: 1px solid #e0e0e0; /* Línea separadora */
+}
+
+.recommended-profile:last-child {
+    border-bottom: none; /* Quita la línea en el último usuario */
+}
+
+
+.recommended-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.follow-btn {
+    margin-left: auto;
+    padding: 5px 10px;
+    background-color: orange;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.follow-btn:hover {
+    background-color: darkorange;
+}
+
+
+
+/* Ajustar el tamaño de las publicaciones */
+.post {
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 800px; /* Limitar el tamaño máximo */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.post img, .post video {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+}
