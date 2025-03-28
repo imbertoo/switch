@@ -2,7 +2,6 @@
 session_start();
 require_once 'db_connect.php'; 
 
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
@@ -136,299 +135,267 @@ $chatUsersResult = $chatUsersQuery->get_result();
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <style>
-        .chat-panel {
-            position: fixed;
-            bottom: 0;
-            right: 20px;
-            width: 350px;
-            height: 450px;
-            background-color: #fff;
-            border-radius: 10px 10px 0 0;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .chat-header {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .chat-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            height: calc(100% - 110px); 
-        }
-        .chat-footer {
-            padding: 10px;
-            border-top: 1px solid #ddd;
-            display: flex;
-            position: sticky;
-            bottom: 0;
-            background-color: #fff;
-            z-index: 10;
-        }
-        .chat-input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-right: 5px;
-        }
-        .chat-send {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 15px;
-            cursor: pointer;
-        }
-        .chat-message {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            border-radius: 18px;
-            max-width: 75%;
-            position: relative;
-        }
-        .chat-message.sent {
-            background-color: #dcf8c6;
-            margin-left: auto;
-            border-bottom-right-radius: 5px;
-        }
-        .chat-message.received {
-            background-color: #f1f0f0;
-            margin-right: auto;
-            border-bottom-left-radius: 5px;
-        }
-        .chat-time {
-            font-size: 0.7rem;
-            color: #6c757d;
-            margin-top: 2px;
-            text-align: right;
-        }
-        .user-list {
-            max-height: 100%;
-            overflow-y: auto;
-            height: calc(100% - 50px); 
-        }
-        .user-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-        .user-item:hover {
-            background-color: #f8f9fa;
-        }
-        .user-item img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .chat-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: red;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-        }
-        .chat-button {
-            position: relative;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .chat-button-pulse {
-            animation: pulse 1.5s infinite;
-        }
-        
-        #backButton {
-            margin-right: 10px;
-            padding: 2px 8px;
-            border-radius: 50%;
-            transition: background-color 0.3s;
-        }
-        
-        #backButton:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        
-        #chatHeaderTitle {
-            display: flex;
-            align-items: center;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        #backButton {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-    </style>
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Sidebar -->
         <nav class="sidebar">
-            <button onclick="location.reload()">Inicio</button>
-            <button onclick="location.href='feed.php'">Feed</button>
-            <button onclick="location.href='upload.php'">Subir publicación</button>
-            <button onclick="location.href='profile.php'">Mi Perfil</button>
-            <button id="chatButton" class="chat-button">
-                <i class="fas fa-comments"></i> Chat
-                <span id="unreadBadge" class="chat-badge" style="display: none;">0</span>
-            </button>
-            <button onclick="location.href='logout.php'">Cerrar Sesión</button>
-        </nav>
-
-        <div class="main-content">
-        <header>
-            <div class="user-info">
-                <a href="profile.php?user_id=<?= $userId ?>">
-                    <img src="<?= $userData['profile_picture'] ?>" alt="Perfil" class="profile-img" width="50" height="50">
-                    <span><?= $userData['username'] ?></span>
+            <div class="sidebar-header">
+                <img src="logo.png" alt="Switch Logo" class="sidebar-logo">
+            </div>
+            <div class="sidebar-menu">
+                <a href="dashboard.php" class="sidebar-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+                <a href="feed.php" class="sidebar-item">
+                    <i class="fas fa-heart"></i>
+                    <span>Notificaciones</span>
+                </a>
+                <a href="upload.php" class="sidebar-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Publicar</span>
+                </a>
+                <a href="profile.php" class="sidebar-item">
+                    <i class="fas fa-user"></i>
+                    <span>Perfil</span>
+                </a>
+                <a href="#" id="chatButton" class="sidebar-item chat-button">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                    <span id="unreadBadge" class="chat-badge" style="display: none;">0</span>
+                </a>
+                <a href="logout.php" class="sidebar-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
                 </a>
             </div>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Buscar usuarios..." onkeyup="searchUsers()">
-                <div id="searchResults" class="search-results" style="display: none;"></div>
-            </div>
-        </header>
-        <div class="feed-and-recommendations">
-            <div class="feed">
-                <?php if ($result->num_rows > 0): ?>
-                    <?php while ($post = $result->fetch_assoc()): ?>
-                        <div class="post">
-                            <img src="<?= $post['profile_picture'] ?>" alt="Perfil" class="post-profile-img">
-                            <div class="post-content">
-                                <h4><a href="profile.php?user_id=<?= $post['user_id'] ?>" style="text-decoration: none; color: inherit;"><?= $post['username'] ?></a></h4>
-                                <p><?= $post['content'] ?></p>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar usuarios..." onkeyup="searchUsers()">
+                    <div id="searchResults" class="search-results" style="display: none;"></div>
+                </div>
+                <div class="user-info">
+                    <a href="profile.php?user_id=<?= $userId ?>" class="user-profile">
+                        <span><?= $userData['username'] ?></span>
+                        <img src="<?= $userData['profile_picture'] ?>" alt="Perfil" class="profile-img">
+                    </a>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Feed Section -->
+                <div class="feed-section">
+                    <?php if ($result->num_rows > 0): ?>
+                        <?php while ($post = $result->fetch_assoc()): ?>
+                            <div class="post-card">
+                                <div class="post-header">
+                                    <a href="profile.php?user_id=<?= $post['user_id'] ?>" class="post-author">
+                                        <img src="<?= $post['profile_picture'] ?>" alt="<?= $post['username'] ?>" class="post-author-img">
+                                        <div class="post-author-info">
+                                            <h4><?= $post['username'] ?></h4>
+                                            <span class="post-date"><?= date('d M Y, H:i', strtotime($post['created_at'])) ?></span>
+                                        </div>
+                                    </a>
+                                    <?php if ($post['user_id'] == $userId): ?>
+                                        <div class="post-actions">
+                                            <button class="post-action-btn" onclick="confirmDelete(<?= $post['id'] ?>)">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                                 
-                                <?php if (!empty($post['image_url'])): ?>
-                                    <img src="<?= $post['image_url'] ?>" alt="Imagen de la publicación" class="post-image" height="250px" width="250px" style="max-width: 100%; height: auto;">
-                                    <br>
+                                <div class="post-content">
+                                    <p><?= $post['content'] ?></p>
+                                    
+                                    <?php if (!empty($post['image_url'])): ?>
+                                        <div class="post-media">
+                                            <img src="<?= $post['image_url'] ?>" alt="Imagen de la publicación" class="post-image">
+                                        </div>
                                     <?php endif; ?>
 
-                                <?php if (!empty($post['video_url'])): ?>
-                                    <video controls style="max-width: 100%; height: auto;">
-                                        <source src="<?= htmlspecialchars($post['video_url'], ENT_QUOTES) ?>" type="video/mp4">
-                                        Tu navegador no soporta la etiqueta de video.
-                                    </video>
-                                    <br>
-                                <?php else: ?>
-                                <?php endif; ?>
-
-                                <span class="post-date"><?= $post['created_at'] ?></span>
-                                
-                                <!-- Verificar si el usuario ya le dio like a la publicación -->
-                                <?php
-                                $likeCheckQuery = $conn->prepare("SELECT id FROM likes WHERE user_id = ? AND post_id = ?");
-                                $likeCheckQuery->bind_param("ii", $userId, $post['id']);
-                                $likeCheckQuery->execute();
-                                $likeCheckResult = $likeCheckQuery->get_result();
-                                $hasLiked = $likeCheckResult->num_rows > 0;
-                                ?>
-
-                                <!-- Botón de Like y recuento -->
-                                <a href="?like_post_id=<?= $post['id'] ?>" class="btn btn-sm">
-                                    <?= $hasLiked ? '❤️' : '🤍' ?> <?= $post['like_count'] ?>
-                                </a>
-
-                                <?php if ($post['user_id'] == $userId): ?>
-                                    <button class="btn btn-sm" onclick="confirmDelete(<?= $post['id'] ?>)">🗑️</button>
-                                <?php endif; ?>
-
-                                <!-- Formulario de comentarios -->
-                                <form method="POST" action="">
-                                    <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
-                                    <textarea name="comment_text" required placeholder="Escribe un comentario..."></textarea>
-                                    <button type="submit" class="btn btn-sm">Comentar</button>
-                                </form>
-
-                                <!-- Mostrar comentarios -->
-                                <div class="comments">
-                                    <?php
-                                    $commentsQuery = $conn->prepare("SELECT comments.id, comments.comment_text, comments.user_id, users.username, users.profile_picture 
-                                                                    FROM comments 
-                                                                    JOIN users ON comments.user_id = users.id 
-                                                                    WHERE post_id = ?");
-                                    $commentsQuery->bind_param("i", $post['id']);
-                                    $commentsQuery->execute();
-                                    $commentsResult = $commentsQuery->get_result();
-                                    while ($comment = $commentsResult->fetch_assoc()):
-                                        // Obtener el número de likes del comentario
-                                        $likeCountQuery = $conn->prepare("SELECT COUNT(*) AS like_count FROM comment_likes WHERE comment_id = ?");
-                                        $likeCountQuery->bind_param("i", $comment['id']);
-                                        $likeCountQuery->execute();
-                                        $likeCountResult = $likeCountQuery->get_result()->fetch_assoc();
-                                        $likeCount = $likeCountResult['like_count'];
-
-                                        // Verificar si el usuario ya le dio like al comentario
-                                        $likeCheckQuery = $conn->prepare("SELECT id FROM comment_likes WHERE user_id = ? AND comment_id = ?");
-                                        $likeCheckQuery->bind_param("ii", $userId, $comment['id']);
-                                        $likeCheckQuery->execute();
-                                        $hasLikedComment = $likeCheckQuery->get_result()->num_rows > 0;
-                                    ?>
-                                        <div class="comment">
-                                            <!-- Foto de perfil a la izquierda del nombre, con borde circular -->
-                                            <img src="<?= $comment['profile_picture'] ?>" alt="Perfil" class="comment-profile-img" width="30" height="30">
-                                            <strong><a href="profile.php?user_id=<?= $comment['user_id'] ?>" style="text-decoration: none; color: inherit;"><?= $comment['username'] ?></a>:</strong> <?= $comment['comment_text'] ?>
-                                            
-                                            <?php if ($comment['user_id'] == $userId || $post['user_id'] == $userId): ?>
-                                                <a href="?delete_comment_id=<?= $comment['id'] ?>" class="btn btn-sm">🗑️</a>
-                                            <?php endif; ?>
-
-                                            <!-- Botón de like para comentarios -->
-                                            <a href="?like_comment_id=<?= $comment['id'] ?>" class="btn btn-sm">
-                                                <?= $hasLikedComment ? '❤️' : '🤍' ?> <?= $likeCount ?>
-                                            </a>
+                                    <?php if (!empty($post['video_url'])): ?>
+                                        <div class="post-media">
+                                            <video controls class="post-video">
+                                                <source src="<?= htmlspecialchars($post['video_url'], ENT_QUOTES) ?>" type="video/mp4">
+                                                Tu navegador no soporta la etiqueta de video.
+                                            </video>
                                         </div>
-                                    <?php endwhile; ?>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="post-footer">
+                                    <?php
+                                    $likeCheckQuery = $conn->prepare("SELECT id FROM likes WHERE user_id = ? AND post_id = ?");
+                                    $likeCheckQuery->bind_param("ii", $userId, $post['id']);
+                                    $likeCheckQuery->execute();
+                                    $likeCheckResult = $likeCheckQuery->get_result();
+                                    $hasLiked = $likeCheckResult->num_rows > 0;
+                                    ?>
+
+                                    <div class="post-stats">
+                                        <a href="?like_post_id=<?= $post['id'] ?>" class="post-stat-item <?= $hasLiked ? 'liked' : '' ?>">
+                                            <i class="<?= $hasLiked ? 'fas' : 'far' ?> fa-heart"></i>
+                                            <span><?= $post['like_count'] ?></span>
+                                        </a>
+                                        <button class="post-stat-item comment-toggle" data-post-id="<?= $post['id'] ?>">
+                                            <i class="far fa-comment"></i>
+                                            <span>Comentar</span>
+                                        </button>
+                                        <button class="post-stat-item">
+                                            <i class="far fa-share-square"></i>
+                                            <span>Compartir</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="post-comments" id="comments-<?= $post['id'] ?>">
+                                        <div class="comment-form">
+                                            <form method="POST" action="" class="comment-input-form">
+                                                <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
+                                                <img src="<?= $userData['profile_picture'] ?>" alt="Tu perfil" class="comment-user-img">
+                                                <div class="comment-input-container">
+                                                    <input type="text" name="comment_text" placeholder="Escribe un comentario..." required class="comment-input">
+                                                    <button type="submit" class="comment-submit">
+                                                        <i class="fas fa-paper-plane"></i>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="comments-list">
+                                            <?php
+                                            $commentsQuery = $conn->prepare("SELECT comments.id, comments.comment_text, comments.user_id, users.username, users.profile_picture 
+                                                                            FROM comments 
+                                                                            JOIN users ON comments.user_id = users.id 
+                                                                            WHERE post_id = ?
+                                                                            ORDER BY comments.created_at DESC
+                                                                            LIMIT 5");
+                                            $commentsQuery->bind_param("i", $post['id']);
+                                            $commentsQuery->execute();
+                                            $commentsResult = $commentsQuery->get_result();
+                                            
+                                            if ($commentsResult->num_rows > 0):
+                                                while ($comment = $commentsResult->fetch_assoc()):
+                                                    // Obtener el número de likes del comentario
+                                                    $likeCountQuery = $conn->prepare("SELECT COUNT(*) AS like_count FROM comment_likes WHERE comment_id = ?");
+                                                    $likeCountQuery->bind_param("i", $comment['id']);
+                                                    $likeCountQuery->execute();
+                                                    $likeCountResult = $likeCountQuery->get_result()->fetch_assoc();
+                                                    $likeCount = $likeCountResult['like_count'];
+
+                                                    // Verificar si el usuario ya le dio like al comentario
+                                                    $likeCheckQuery = $conn->prepare("SELECT id FROM comment_likes WHERE user_id = ? AND comment_id = ?");
+                                                    $likeCheckQuery->bind_param("ii", $userId, $comment['id']);
+                                                    $likeCheckQuery->execute();
+                                                    $hasLikedComment = $likeCheckQuery->get_result()->num_rows > 0;
+                                            ?>
+                                                <div class="comment-item">
+                                                    <img src="<?= $comment['profile_picture'] ?>" alt="<?= $comment['username'] ?>" class="comment-author-img">
+                                                    <div class="comment-content">
+                                                        <div class="comment-header">
+                                                            <a href="profile.php?user_id=<?= $comment['user_id'] ?>" class="comment-author-name"><?= $comment['username'] ?></a>
+                                                            <div class="comment-actions">
+                                                                <a href="?like_comment_id=<?= $comment['id'] ?>" class="comment-like <?= $hasLikedComment ? 'liked' : '' ?>">
+                                                                    <i class="<?= $hasLikedComment ? 'fas' : 'far' ?> fa-heart"></i>
+                                                                    <?php if ($likeCount > 0): ?>
+                                                                        <span><?= $likeCount ?></span>
+                                                                    <?php endif; ?>
+                                                                </a>
+                                                                <?php if ($comment['user_id'] == $userId || $post['user_id'] == $userId): ?>
+                                                                    <a href="?delete_comment_id=<?= $comment['id'] ?>" class="comment-delete" onclick="return confirm('¿Estás seguro de eliminar este comentario?')">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                        <p class="comment-text"><?= $comment['comment_text'] ?></p>
+                                                    </div>
+                                                </div>
+                                            <?php 
+                                                endwhile;
+                                            else:
+                                            ?>
+                                                <div class="no-comments">
+                                                    <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <div class="no-posts">
+                            <div class="no-posts-icon">
+                                <i class="far fa-newspaper"></i>
+                            </div>
+                            <h3>No hay publicaciones</h3>
+                            <p>Sigue a más personas para ver sus publicaciones o crea tu primera publicación.</p>
+                            <a href="upload.php" class="btn-create-post">Crear publicación</a>
                         </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p class="no-posts">¡Vaya! No hay más publicaciones.</p>
-                <?php endif; ?>
-            </div>
-            <div class="recommended-profiles">
-                <h3>Personas que quizás conozcas:</h3>
-                <?php while ($recommendation = $recommendedResult->fetch_assoc()): ?>
-                    <div class="recommended-profile">
-                        <img src="<?= $recommendation['profile_picture'] ?>" alt="Perfil de <?= $recommendation['username'] ?>" class="recommended-profile-img">
-                        <span><?= $recommendation['username'] ?></span>
-                        <button class="follow-btn">Seguir</button>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Sidebar Section -->
+                <div class="sidebar-section">
+                    <div class="user-profile-card">
+                        <a href="profile.php?user_id=<?= $userId ?>" class="user-profile-link">
+                            <img src="<?= $userData['profile_picture'] ?>" alt="<?= $userData['username'] ?>" class="user-profile-img">
+                            <div class="user-profile-info">
+                                <h4><?= $userData['username'] ?></h4>
+                                <p>Ver mi perfil</p>
+                            </div>
+                        </a>
                     </div>
-                <?php endwhile; ?>
+
+                    <div class="recommended-card">
+                        <div class="recommended-header">
+                            <h4>Sugerencias para ti</h4>
+                        </div>
+                        
+                        <?php if ($recommendedResult->num_rows > 0): ?>
+                            <div class="recommended-list">
+                                <?php while ($recommendation = $recommendedResult->fetch_assoc()): ?>
+                                    <div class="recommended-item">
+                                        <a href="profile.php?user_id=<?= $recommendation['id'] ?>" class="recommended-user">
+                                            <img src="<?= $recommendation['profile_picture'] ?>" alt="<?= $recommendation['username'] ?>" class="recommended-user-img">
+                                            <div class="recommended-user-info">
+                                                <h5><?= $recommendation['username'] ?></h5>
+                                                <p>Sugerido para ti</p>
+                                            </div>
+                                        </a>
+                                        <button class="btn-follow" data-user-id="<?= $recommendation['id'] ?>">Seguir</button>
+                                    </div>
+                                <?php endwhile; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="no-recommendations">
+                                <p>No hay sugerencias disponibles en este momento.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="footer-links">
+                        <a href="#">Acerca de</a>
+                        <a href="#">Ayuda</a>
+                        <a href="#">Privacidad</a>
+                        <a href="#">Términos</a>
+                        <p>© 2025 Switch. Todos los derechos reservados.</p>
+                    </div>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 
@@ -436,15 +403,18 @@ $chatUsersResult = $chatUsersQuery->get_result();
     <div id="chatPanel" class="chat-panel">
         <div class="chat-header">
             <div id="chatHeaderTitle" class="d-flex align-items-center">
-                <!-- Botón de volver, inicialmente oculto -->
-                <button id="backButton" class="btn btn-sm text-white mr-2" style="display: none;">
+                <button id="backButton" class="btn-back" style="display: none;">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <span>Chat</span>
             </div>
-            <div>
-                <button id="minimizeChat" class="btn btn-sm text-white"><i class="fas fa-minus"></i></button>
-                <button id="closeChat" class="btn btn-sm text-white"><i class="fas fa-times"></i></button>
+            <div class="chat-header-actions">
+                <button id="minimizeChat" class="btn-chat-action">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button id="closeChat" class="btn-chat-action">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
         
@@ -453,28 +423,35 @@ $chatUsersResult = $chatUsersQuery->get_result();
             <?php while ($chatUser = $chatUsersResult->fetch_assoc()): ?>
                 <div class="user-item" data-user-id="<?= $chatUser['id'] ?>" data-username="<?= $chatUser['username'] ?>">
                     <img src="<?= $chatUser['profile_picture'] ?>" alt="<?= $chatUser['username'] ?>">
-                    <span><?= $chatUser['username'] ?></span>
-                    <span class="unread-badge badge badge-danger rounded-pill float-right" style="display: none;">0</span>
+                    <div class="user-item-info">
+                        <span class="user-item-name"><?= $chatUser['username'] ?></span>
+                        <span class="user-item-status">En línea</span>
+                    </div>
+                    <span class="unread-badge" style="display: none;">0</span>
                 </div>
             <?php endwhile; ?>
         </div>
         
         <!-- Área de mensajes -->
         <div id="chatBody" class="chat-body" style="display: none;">
-
+            <!-- Los mensajes se cargarán aquí dinámicamente -->
         </div>
         
         <!-- Formulario para enviar mensajes -->
         <div id="chatFooter" class="chat-footer" style="display: none;">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Escribe un mensaje...">
-            <button id="chatSend" class="chat-send"><i class="fas fa-paper-plane"></i></button>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Escribe un mensaje...">
+                <button id="chatSend" class="chat-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
         function confirmDelete(postId) {
             if (confirm("¿Estás seguro de que deseas eliminar esta publicación?")) {
-                window.location.href = 'delete_post.php?id=' + postId; // Redirigir al script de eliminación
+                window.location.href = 'delete_post.php?id=' + postId;
             }
         }
 
@@ -500,6 +477,12 @@ $chatUsersResult = $chatUsersQuery->get_result();
             if (!$(event.target).closest('#searchInput, #searchResults').length) {
                 $('#searchResults').hide();
             }
+        });
+
+        // Mostrar/ocultar comentarios
+        $(document).on('click', '.comment-toggle', function() {
+            const postId = $(this).data('post-id');
+            $(`#comments-${postId}`).slideToggle();
         });
 
         // Variables para el chat
@@ -673,7 +656,7 @@ $chatUsersResult = $chatUsersQuery->get_result();
             chatBody.empty();
             
             if (messages.length === 0) {
-                chatBody.append('<div class="text-center p-3">No hay mensajes. ¡Sé el primero en escribir!</div>');
+                chatBody.append('<div class="no-messages">No hay mensajes aún. ¡Sé el primero en escribir!</div>');
                 return;
             }
             
@@ -687,24 +670,24 @@ $chatUsersResult = $chatUsersQuery->get_result();
 
         // Añadir un mensaje al chat
         function appendMessage(message) {
-    const chatBody = $('#chatBody');
-    const isSent = message.sender_id == currentUserId;
-    const messageElement = $('<div>').addClass(`chat-message ${isSent ? 'sent' : 'received'}`);
-    
-    // Formatear la fecha
-    const timestamp = new Date(message.timestamp);
-    const formattedTime = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    messageElement.html(`
-        <div class="message-content">${escapeHtml(message.message)}</div>
-        <div class="chat-time">${formattedTime}</div>
-    `);
-    
-    chatBody.append(messageElement);
-    
-    // Desplazarse al último mensaje
-    chatBody.scrollTop(chatBody[0].scrollHeight);
-}
+            const chatBody = $('#chatBody');
+            const isSent = message.sender_id == currentUserId;
+            const messageElement = $('<div>').addClass(`chat-message ${isSent ? 'sent' : 'received'}`);
+            
+            // Formatear la fecha
+            const timestamp = new Date(message.timestamp);
+            const formattedTime = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageElement.html(`
+                <div class="message-content">${escapeHtml(message.message)}</div>
+                <div class="chat-time">${formattedTime}</div>
+            `);
+            
+            chatBody.append(messageElement);
+            
+            // Desplazarse al último mensaje
+            chatBody.scrollTop(chatBody[0].scrollHeight);
+        }
 
         // Escapar HTML para prevenir XSS
         function escapeHtml(text) {
