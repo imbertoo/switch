@@ -27,8 +27,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Crear el directorio si no existe
             if (!file_exists($targetDir)) {
                 mkdir($targetDir, 0777, true);
-            $fileName = basename($_FILES["image"]["name"]);
             }
+            
+            $fileName = basename($_FILES["image"]["name"]);
             
             $fileName = basename($_FILES["image"]["name"]);
             $targetFile = $targetDir . time() . '_' . $fileName; // Añadir timestamp para evitar duplicados
@@ -126,13 +127,14 @@ $recommendedResult = $recommendedQuery->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subir Publicación - Switch</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="shortcut icon" href="favicon.ico"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/css/emoji-picker-element.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     <style>
         .preview-container {
             margin-top: 15px;
@@ -164,6 +166,42 @@ $recommendedResult = $recommendedQuery->get_result();
         .progress-bar {
             background-color: #007bff;
             transition: width 0.3s ease;
+        }
+
+        .emoji-button {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.2s;
+            z-index: 10;
+        }
+
+        .emoji-button:hover {
+            color: #007bff;
+        }
+
+        .emoji-picker-container {
+            position: absolute;
+            bottom: 40px;
+            right: 10px;
+            z-index: 1000;
+            display: none;
+        }
+
+        emoji-picker {
+            --emoji-size: 1.5rem;
+            --num-columns: 8;
+            --emoji-padding: 0.4rem;
+            --border-color: #e1e1e1;
+            --border-radius: 12px;
+            --category-emoji-size: 1.25rem;
+            height: 300px;
+            width: 320px;
         }
     </style>
 </head>
@@ -245,7 +283,15 @@ $recommendedResult = $recommendedQuery->get_result();
                         <form action="upload.php" method="post" enctype="multipart/form-data" id="uploadForm" class="upload-form">
                             <div class="form-group">
                                 <label for="content">¿Qué estás pensando?</label>
-                                <textarea id="content" name="content" class="form-control" placeholder="Escribe algo..." maxlength="500"></textarea>
+                                <div style="position: relative;">
+                                    <textarea id="content" name="content" class="form-control" placeholder="Escribe algo..." maxlength="500"></textarea>
+                                    <button type="button" id="emojiButton" class="emoji-button" title="Insertar emoji">
+                                        <i class="far fa-smile"></i>
+                                    </button>
+                                    <div id="emojiPickerContainer" class="emoji-picker-container">
+                                        <emoji-picker></emoji-picker>
+                                    </div>
+                                </div>
                                 <div class="character-count">0/500 caracteres</div>
                             </div>
                             
@@ -316,6 +362,7 @@ $recommendedResult = $recommendedQuery->get_result();
                     <div class="recommended-card">
                         <div class="recommended-header">
                             <h4>Sugerencias para ti</h4>
+                            <a href="#" class="see-all">Ver todo</a>
                         </div>
                         
                         <?php if ($recommendedResult->num_rows > 0): ?>
@@ -345,7 +392,7 @@ $recommendedResult = $recommendedQuery->get_result();
                         <a href="#">Ayuda</a>
                         <a href="#">Privacidad</a>
                         <a href="#">Términos</a>
-                        <p>© 2025 Switch. Todos los derechos reservados.</p>
+                        <p>© 2023 Switch. Todos los derechos reservados.</p>
                     </div>
                 </div>
             </div>
@@ -378,7 +425,7 @@ $recommendedResult = $recommendedQuery->get_result();
                     <img src="<?= $chatUser['profile_picture'] ?>" alt="<?= $chatUser['username'] ?>">
                     <div class="user-item-info">
                         <span class="user-item-name"><?= $chatUser['username'] ?></span>
-                        <span class="user-item-status">En línea</span>
+                        <span class="user-item-status">Pulsa para abrir el chat</span>
                     </div>
                     <span class="unread-badge" style="display: none;">0</span>
                 </div>
@@ -887,6 +934,58 @@ $recommendedResult = $recommendedQuery->get_result();
                 
                 // Limpiar campo de entrada
                 $('#chatInput').val('');
+            }
+        });
+
+        // Funcionalidad del selector de emojis
+        const emojiButton = document.getElementById('emojiButton');
+        const emojiPickerContainer = document.getElementById('emojiPickerContainer');
+        const emojiPicker = document.querySelector('emoji-picker');
+        const contentTextarea = document.getElementById('content');
+
+        // Mostrar/ocultar el selector de emojis
+        emojiButton.addEventListener('click', () => {
+            emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Insertar emoji seleccionado en el textarea
+        emojiPicker.addEventListener('emoji-click', event => {
+            const emoji = event.detail.unicode;
+            
+            // Obtener la posición actual del cursor
+            const startPos = contentTextarea.selectionStart;
+            const endPos = contentTextarea.selectionEnd;
+            
+            // Insertar el emoji en la posición del cursor
+            const textBefore = contentTextarea.value.substring(0, startPos);
+            const textAfter = contentTextarea.value.substring(endPos);
+            contentTextarea.value = textBefore + emoji + textAfter;
+            
+            // Actualizar el contador de caracteres
+            const maxLength = 500;
+            const currentLength = contentTextarea.value.length;
+            $('.character-count').text(currentLength + '/' + maxLength + ' caracteres');
+            
+            if (currentLength >= maxLength) {
+                $('.character-count').css('color', '#dc3545');
+            } else {
+                $('.character-count').css('color', '#6c757d');
+            }
+            
+            // Ocultar el selector después de seleccionar un emoji
+            emojiPickerContainer.style.display = 'none';
+            
+            // Establecer el foco de nuevo en el textarea y colocar el cursor después del emoji
+            contentTextarea.focus();
+            contentTextarea.selectionStart = startPos + emoji.length;
+            contentTextarea.selectionEnd = startPos + emoji.length;
+        });
+
+        // Cerrar el selector de emojis al hacer clic fuera
+        document.addEventListener('click', (event) => {
+            if (!emojiButton.contains(event.target) && 
+                !emojiPickerContainer.contains(event.target)) {
+                emojiPickerContainer.style.display = 'none';
             }
         });
     </script>

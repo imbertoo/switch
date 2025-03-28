@@ -563,7 +563,7 @@ if (isset($_GET['delete_comment_id'])) {
                     <img src="<?= $chatUser['profile_picture'] ?>" alt="<?= $chatUser['username'] ?>">
                     <div class="user-item-info">
                         <span class="user-item-name"><?= $chatUser['username'] ?></span>
-                        <span class="user-item-status">En línea</span>
+                        <span class="user-item-status">Pulsa para abrir el chat</span>
                     </div>
                     <span class="unread-badge" style="display: none;">0</span>
                 </div>

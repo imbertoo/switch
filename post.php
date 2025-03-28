@@ -470,8 +470,8 @@ $recommendedResult = $recommendedQuery->get_result();
                     <span>Inicio</span>
                 </a>
                 <a href="feed.php" class="sidebar-item">
-                    <i class="fas fa-compass"></i>
-                    <span>Explorar</span>
+                    <i class="fas fa-heart"></i>
+                    <span>Notificaciones</span>
                 </a>
                 <a href="upload.php" class="sidebar-item">
                     <i class="fas fa-plus-circle"></i>
