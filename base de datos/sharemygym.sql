@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-03-2025 a las 21:00:54
+-- Tiempo de generación: 31-03-2025 a las 23:35:33
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -54,12 +54,9 @@ CREATE TABLE `comments` (
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `post_id`, `comment_text`, `created_at`) VALUES
-(5, 14, 2, 'maricon', '2025-01-23 17:58:08'),
-(7, 1, 2, 'bloste', '2025-01-23 18:08:19'),
-(9, 14, 10, 'sii', '2025-01-23 18:30:18'),
 (10, 1, 11, 'sii', '2025-01-23 19:20:10'),
-(11, 14, 1, 'me la pela', '2025-01-23 19:24:26'),
-(12, 14, 8, 'nigga', '2025-01-23 19:25:05');
+(15, 1, 14, 'mola', '2025-03-28 00:20:18'),
+(17, 1, 18, 'jajaj chema', '2025-03-28 01:24:54');
 
 -- --------------------------------------------------------
 
@@ -79,9 +76,7 @@ CREATE TABLE `comment_likes` (
 --
 
 INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`, `created_at`) VALUES
-(6, 1, 5, '2025-01-23 18:00:30'),
-(9, 1, 9, '2025-01-23 18:38:51'),
-(10, 14, 9, '2025-01-23 18:41:30');
+(13, 1, 17, '2025-03-31 13:16:03');
 
 -- --------------------------------------------------------
 
@@ -153,8 +148,18 @@ INSERT INTO `friends` (`id`, `user_id`, `friend_id`, `status`, `created_at`) VAL
 (20, 5, 4, 'accepted', '2024-10-03 14:26:35'),
 (22, 14, 2, 'accepted', '2025-01-23 17:58:02'),
 (24, 14, 1, 'accepted', '2025-01-23 19:25:18'),
-(28, 1, 14, 'accepted', '2025-01-24 19:55:16'),
-(29, 15, 1, 'accepted', '2025-03-26 14:15:35');
+(29, 15, 1, 'accepted', '2025-03-26 14:15:35'),
+(33, 14, 4, 'accepted', '2025-03-27 23:39:35'),
+(34, 14, 15, 'accepted', '2025-03-28 00:17:15'),
+(35, 15, 2, 'accepted', '2025-03-28 00:23:50'),
+(39, 1, 14, 'accepted', '2025-03-28 00:36:40'),
+(41, 1, 15, 'accepted', '2025-03-31 13:11:10'),
+(42, 19, 1, 'accepted', '2025-03-31 13:42:58'),
+(44, 1, 19, 'accepted', '2025-03-31 13:46:35'),
+(45, 19, 15, 'accepted', '2025-03-31 13:49:00'),
+(46, 20, 1, 'accepted', '2025-03-31 21:31:18'),
+(47, 20, 14, 'accepted', '2025-03-31 21:31:21'),
+(48, 1, 20, 'accepted', '2025-03-31 21:31:57');
 
 -- --------------------------------------------------------
 
@@ -174,10 +179,10 @@ CREATE TABLE `likes` (
 --
 
 INSERT INTO `likes` (`id`, `user_id`, `post_id`, `created_at`) VALUES
-(20, 1, 8, '2025-01-23 18:38:55'),
 (24, 1, 11, '2025-01-24 19:50:18'),
-(25, 1, 1, '2025-02-26 16:58:11'),
-(26, 14, 11, '2025-03-26 00:22:32');
+(26, 14, 11, '2025-03-26 00:22:32'),
+(49, 1, 18, '2025-03-31 13:11:15'),
+(55, 20, 20, '2025-03-31 21:31:32');
 
 -- --------------------------------------------------------
 
@@ -199,15 +204,64 @@ CREATE TABLE `posts` (
 --
 
 INSERT INTO `posts` (`id`, `user_id`, `content`, `image_url`, `video_url`, `created_at`) VALUES
-(1, 1, '¡Hola, soy Imberto! Estoy emocionado por compartir mi progreso en el gimnasio.', NULL, NULL, '2024-10-03 14:28:12'),
-(2, 2, '¡Primera semana de entrenamiento completada! ¡Listo para seguir mejorando!', NULL, NULL, '2024-10-03 14:28:12'),
-(3, 3, '¡Hoy logré levantar 180 kg en peso muerto! ¡Me siento genial!', NULL, NULL, '2024-10-03 14:28:12'),
-(4, 4, 'El ejercicio es clave para una vida saludable. ¡A seguir entrenando!', NULL, NULL, '2024-10-03 14:28:12'),
-(5, 5, '¡Iniciando mi viaje fitness! Estoy ansioso por ver resultados.', NULL, NULL, '2024-10-03 14:28:12'),
-(8, 1, 'siii bloste', NULL, NULL, '2024-10-08 13:28:49'),
-(10, 1, 'esto es una prueba', NULL, NULL, '2025-01-23 13:17:18'),
 (11, 14, 'bloste', 'uploads/217bd083-abe1-41fe-a277-d230753cf987.jpg', NULL, '2025-01-23 13:20:19'),
-(13, 1, 'prueba', NULL, NULL, '2025-03-26 14:13:56');
+(14, 14, 'Asi voy programando esto.', NULL, 'uploads/videos/1743120261_2025-03-26 15-16-56.mp4', '2025-03-28 00:04:21'),
+(18, 15, '🗣️ ENDERPEEEARL', NULL, 'uploads/videos/1743125054_v0f044gc0000cro13u7og65pd6pvsrkg.mp4', '2025-03-28 01:24:14'),
+(20, 1, 'Hoy ha sido un día increíble, el clima perfecto para un paseo.', NULL, NULL, '2025-03-31 21:26:08'),
+(21, 2, 'No hay nada mejor que empezar el día con un buen café ☕.', NULL, NULL, '2025-03-31 21:26:08'),
+(22, 3, '¿Alguien más siente que esta semana ha sido eterna? 😂', NULL, NULL, '2025-03-31 21:26:08'),
+(23, 4, 'Acabo de descubrir una nueva serie y estoy enganchado.', NULL, NULL, '2025-03-31 21:26:08'),
+(24, 5, 'Las pequeñas cosas de la vida son las que más importan.', NULL, NULL, '2025-03-31 21:26:08'),
+(25, 6, 'Hoy vi una película que me dejó pensando mucho.', NULL, NULL, '2025-03-31 21:26:08'),
+(26, 14, 'Mañana es un gran día, espero que todo salga bien.', NULL, NULL, '2025-03-31 21:26:08'),
+(27, 15, 'Un día más, un aprendizaje más.', NULL, NULL, '2025-03-31 21:26:08'),
+(28, 19, 'Voy a intentar cocinar algo nuevo hoy.', NULL, NULL, '2025-03-31 21:26:08'),
+(29, 1, 'Leer un buen libro antes de dormir es lo mejor.', NULL, NULL, '2025-03-31 21:26:08'),
+(30, 2, '¿Por qué los lunes son tan difíciles? 😩', NULL, NULL, '2025-03-31 21:26:08'),
+(31, 3, 'Hoy decidí salir a correr y me sentí genial.', NULL, NULL, '2025-03-31 21:26:08'),
+(32, 4, 'Me recomendaron una nueva serie, a ver qué tal.', NULL, NULL, '2025-03-31 21:26:08'),
+(33, 5, 'Escuchar música a todo volumen es terapéutico.', NULL, NULL, '2025-03-31 21:26:08'),
+(34, 6, 'Mi gato se pasó todo el día durmiendo, qué envidia.', NULL, NULL, '2025-03-31 21:26:08'),
+(35, 14, 'A veces un cambio de rutina viene bien.', NULL, NULL, '2025-03-31 21:26:08'),
+(36, 15, 'Extraño viajar, ojalá pronto pueda hacerlo.', NULL, NULL, '2025-03-31 21:26:08'),
+(37, 19, 'Los días de lluvia son perfectos para relajarse.', NULL, NULL, '2025-03-31 21:26:08'),
+(38, 1, 'Nada como un buen desayuno para empezar el día.', NULL, NULL, '2025-03-31 21:26:08'),
+(39, 2, 'El tráfico hoy estaba imposible, qué locura.', NULL, NULL, '2025-03-31 21:26:08'),
+(40, 3, 'Terminé un proyecto importante, qué alivio.', NULL, NULL, '2025-03-31 21:26:08'),
+(41, 4, 'Me encontré con un amigo de la infancia hoy.', NULL, NULL, '2025-03-31 21:26:08'),
+(42, 5, 'Las redes sociales a veces pueden ser agotadoras.', NULL, NULL, '2025-03-31 21:26:08'),
+(43, 6, 'Hoy me propuse aprender algo nuevo.', NULL, NULL, '2025-03-31 21:26:08'),
+(44, 14, 'Tengo ganas de hacer algo diferente este fin de semana.', NULL, NULL, '2025-03-31 21:26:08'),
+(45, 15, 'Me puse a organizar mi escritorio, ahora todo está en orden.', NULL, NULL, '2025-03-31 21:26:08'),
+(46, 19, 'A veces el silencio es lo mejor para concentrarse.', NULL, NULL, '2025-03-31 21:26:08'),
+(47, 1, 'Intentando dejar de procrastinar... otra vez.', NULL, NULL, '2025-03-31 21:26:08'),
+(48, 2, 'Hoy me desperté con mucha energía, qué raro.', NULL, NULL, '2025-03-31 21:26:08'),
+(49, 3, 'Caminé por el parque y fue muy relajante.', NULL, NULL, '2025-03-31 21:26:08'),
+(50, 4, 'Escuché un podcast muy interesante hoy.', NULL, NULL, '2025-03-31 21:26:08'),
+(51, 5, 'Las pequeñas victorias también cuentan.', NULL, NULL, '2025-03-31 21:26:08'),
+(52, 6, 'Voy a empezar un reto de 30 días, a ver cómo me va.', NULL, NULL, '2025-03-31 21:26:08'),
+(53, 14, 'Reencontrarse con viejos amigos siempre es bonito.', NULL, NULL, '2025-03-31 21:26:08'),
+(54, 15, 'Un café bien cargado para seguir el día.', NULL, NULL, '2025-03-31 21:26:08'),
+(55, 19, 'Cocinando mi plato favorito hoy.', NULL, NULL, '2025-03-31 21:26:08'),
+(56, 1, 'A veces hace falta un respiro.', NULL, NULL, '2025-03-31 21:26:08'),
+(57, 2, 'Pensando en nuevos proyectos.', NULL, NULL, '2025-03-31 21:26:08'),
+(58, 3, 'Hoy compré un libro nuevo, emocionado por leerlo.', NULL, NULL, '2025-03-31 21:26:08'),
+(59, 4, 'Nada como un paseo al aire libre para despejar la mente.', NULL, NULL, '2025-03-31 21:26:08'),
+(60, 5, 'Hoy intenté hacer meditación, fue interesante.', NULL, NULL, '2025-03-31 21:26:08'),
+(61, 6, 'Me gusta la sensación de un día productivo.', NULL, NULL, '2025-03-31 21:26:08'),
+(62, 14, 'El tiempo pasa volando, ya casi se acaba el mes.', NULL, NULL, '2025-03-31 21:26:08'),
+(63, 15, 'Hoy fue un día normal, pero a veces eso es lo mejor.', NULL, NULL, '2025-03-31 21:26:08'),
+(64, 19, 'Probé una nueva cafetería y me encantó.', NULL, NULL, '2025-03-31 21:26:08'),
+(65, 1, 'Voy a empezar a aprender un nuevo idioma.', NULL, NULL, '2025-03-31 21:26:08'),
+(66, 2, 'Nada como una tarde de juegos con amigos.', NULL, NULL, '2025-03-31 21:26:08'),
+(67, 3, 'Se acerca el fin de semana, ya era hora.', NULL, NULL, '2025-03-31 21:26:08'),
+(68, 4, 'Hoy cociné algo improvisado y quedó genial.', NULL, NULL, '2025-03-31 21:26:08'),
+(69, 5, 'A veces es bueno hacer una pausa y reflexionar.', NULL, NULL, '2025-03-31 21:26:08'),
+(70, 6, 'Días largos, pero satisfactorios.', NULL, NULL, '2025-03-31 21:26:08'),
+(71, 14, 'Escuchar música mientras trabajo me motiva.', NULL, NULL, '2025-03-31 21:26:08'),
+(72, 15, 'Hoy aprendí algo nuevo, eso siempre es bueno.', NULL, NULL, '2025-03-31 21:26:08'),
+(73, 19, 'Planificando un viaje, a ver si se da.', NULL, NULL, '2025-03-31 21:26:08'),
+(74, 20, 'jeje', 'uploads/images/1743456666_IMG_4225.jpg', NULL, '2025-03-31 21:31:06');
 
 -- --------------------------------------------------------
 
@@ -246,11 +300,35 @@ INSERT INTO `private_messages` (`id`, `sender_id`, `receiver_id`, `message`, `ti
 (15, 14, 1, 'que tal', '2025-03-26 01:45:54', 1),
 (16, 1, 14, 'bieen', '2025-03-26 01:45:57', 1),
 (17, 14, 1, 'hola!', '2025-03-26 01:46:44', 1),
-(18, 15, 1, 'hola!', '2025-03-26 15:17:01', 0),
-(19, 1, 15, 'hey!', '2025-03-26 15:17:06', 0),
-(20, 15, 1, 'work', '2025-03-26 15:17:13', 0),
-(21, 1, 15, 'sii', '2025-03-26 15:17:14', 0),
-(22, 1, 15, ':)', '2025-03-26 15:17:16', 0);
+(18, 15, 1, 'hola!', '2025-03-26 15:17:01', 1),
+(19, 1, 15, 'hey!', '2025-03-26 15:17:06', 1),
+(20, 15, 1, 'work', '2025-03-26 15:17:13', 1),
+(21, 1, 15, 'sii', '2025-03-26 15:17:14', 1),
+(22, 1, 15, ':)', '2025-03-26 15:17:16', 1),
+(23, 1, 15, 'meca', '2025-03-26 21:11:47', 1),
+(24, 1, 15, 'holaa', '2025-03-26 21:11:50', 1),
+(25, 1, 15, 'jeje', '2025-03-26 21:11:51', 1),
+(26, 1, 15, 'good', '2025-03-26 21:11:53', 1),
+(27, 15, 1, 'que pasó?', '2025-03-26 21:15:39', 1),
+(28, 1, 15, 'nana', '2025-03-28 00:30:45', 1),
+(29, 1, 15, 'todo chill', '2025-03-28 00:30:48', 1),
+(30, 14, 15, 'hola', '2025-03-28 01:13:20', 1),
+(31, 15, 14, 'hey!', '2025-03-28 01:13:24', 1),
+(32, 14, 15, 'jeje te seguí', '2025-03-28 01:17:58', 1),
+(33, 15, 14, 'gracias!', '2025-03-28 01:18:05', 1),
+(34, 19, 1, 'nigga', '2025-03-31 15:44:58', 1),
+(35, 1, 19, 'que cojones tio', '2025-03-31 15:45:09', 1),
+(36, 1, 19, 'pero', '2025-03-31 15:45:10', 1),
+(37, 1, 19, 'porqie', '2025-03-31 15:45:11', 1),
+(38, 1, 19, 'nooo', '2025-03-31 15:45:12', 1),
+(39, 19, 1, 'siiii', '2025-03-31 15:45:14', 1),
+(40, 19, 1, 'siii', '2025-03-31 15:45:15', 1),
+(41, 19, 1, 'siii', '2025-03-31 15:45:16', 1),
+(42, 1, 19, 'no...', '2025-03-31 15:45:21', 1),
+(43, 1, 19, 'porfa', '2025-03-31 15:45:22', 1),
+(44, 1, 19, 'joder macho', '2025-03-31 15:45:32', 1),
+(45, 19, 1, 'siii siii', '2025-03-31 15:45:42', 1),
+(46, 19, 15, 'holaaaaaa', '2025-03-31 15:49:04', 0);
 
 -- --------------------------------------------------------
 
@@ -294,8 +372,10 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_imag
 (4, 'osbo777', 'user2@example.com', 'hashed_password3', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
 (5, 'bloste', 'user3@example.com', 'hashed_password4', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
 (6, 'canadre', 'user4@example.com', 'hashed_password5', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
-(14, 'test', 'test@test.com', '$2y$10$MVoYSHS/g2qnsdAvhIs.2u.pBc2VvfcykCyjVIFz.RSP3/6aB./Me', NULL, NULL, '2025-01-23 13:18:35', 'uploads/historico.PNG'),
-(15, 'rodrii12', 'rodrii12@gmail.com', '$2y$10$4JzZpK4iU3/f.OwvBLjIZepg1oksukDo8o1xhNEIEhMKRE1ZL18TS', NULL, NULL, '2025-03-26 14:15:05', 'uploads/FOTO.jpg');
+(14, 'test', 'test@test.com', '$2y$10$MVoYSHS/g2qnsdAvhIs.2u.pBc2VvfcykCyjVIFz.RSP3/6aB./Me', NULL, NULL, '2025-01-23 13:18:35', 'uploads/0eda11ba-5822-4429-95e4-54530b8c1dd1.jpg'),
+(15, 'rodrii12', 'rodrii12@gmail.com', '$2y$10$4JzZpK4iU3/f.OwvBLjIZepg1oksukDo8o1xhNEIEhMKRE1ZL18TS', NULL, NULL, '2025-03-26 14:15:05', 'uploads/FOTO.jpg'),
+(19, 'PatitoGames', 'patitoyt@gmail.com', '$2y$10$Vtao6KmzXFaQ19dsMuzucOPvM6OBORznfOFFUHon5JOYqX0wapdf2', NULL, NULL, '2025-03-31 13:41:56', 'uploads/images.jpg'),
+(20, 'soybertopro', 'soybertopro@gmail.com', '$2y$10$OZvRSS7er/H/GvhddZZgcusehxKUKxmiI5LC5Oh67X/9BSuAA1NRm', NULL, NULL, '2025-03-31 21:26:54', 'uploads/default-avatar.png');
 
 --
 -- Índices para tablas volcadas
@@ -398,13 +478,13 @@ ALTER TABLE `api_tokens`
 -- AUTO_INCREMENT de la tabla `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `exercises`
@@ -416,25 +496,25 @@ ALTER TABLE `exercises`
 -- AUTO_INCREMENT de la tabla `friends`
 --
 ALTER TABLE `friends`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT de la tabla `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT de la tabla `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
 
 --
 -- AUTO_INCREMENT de la tabla `private_messages`
 --
 ALTER TABLE `private_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT de la tabla `progress`
@@ -446,7 +526,7 @@ ALTER TABLE `progress`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- Restricciones para tablas volcadas
