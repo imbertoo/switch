@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $hashed_password = password_hash($password, PASSWORD_BCRYPT);
                 
                 // Imagen de perfil por defecto
-                $default_profile = "default-avatar.png";
+                $default_profile = "uploads/default-avatar.png";
 
                 // Insertar el nuevo usuario en la base de datos
                 $insert_query = $conn->prepare("INSERT INTO users (username, email, password, profile_picture) VALUES (?, ?, ?, ?)");

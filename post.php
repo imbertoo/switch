@@ -455,6 +455,57 @@ $recommendedResult = $recommendedQuery->get_result();
             opacity: 0.7;
             cursor: not-allowed;
         }
+
+        .emoji-button {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .emoji-button:hover {
+            color: #007bff;
+        }
+
+        .emoji-picker-container {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            width: 100%;
+            max-width: 320px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 100;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+        }
+
+        .emoji-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .emoji-item:hover {
+            background-color: #f1f1f1;
+        }
     </style>
 </head>
 <body>
@@ -556,10 +607,10 @@ $recommendedResult = $recommendedQuery->get_result();
                         
                         <div class="post-footer">
                             <div class="post-stats">
-                                <a href="?id=<?= $postId ?>&like_post_id=<?= $post['id'] ?>" class="post-stat-item <?= $hasLiked ? 'liked' : '' ?>">
+                                <button class="post-stat-item like-button <?= $hasLiked ? 'liked' : '' ?>" data-post-id="<?= $post['id'] ?>">
                                     <i class="<?= $hasLiked ? 'fas' : 'far' ?> fa-heart"></i>
-                                    <span><?= $post['like_count'] ?></span>
-                                </a>
+                                    <span class="like-count"><?= $post['like_count'] ?></span>
+                                </button>
                                 <button class="post-stat-item" onclick="document.getElementById('comment-input').focus()">
                                     <i class="far fa-comment"></i>
                                     <span>Comentar</span>
@@ -576,10 +627,14 @@ $recommendedResult = $recommendedQuery->get_result();
                                         <img src="<?= $userData['profile_picture'] ?>" alt="Tu perfil" class="comment-user-img">
                                         <div class="comment-input-container">
                                             <input type="text" name="comment_text" placeholder="Escribe un comentario..." required class="comment-input" id="comment-input">
+                                            <button type="button" class="emoji-button" data-post-id="<?= $postId ?>">
+                                                <i class="far fa-smile"></i>
+                                            </button>
                                             <button type="submit" class="comment-submit">
                                                 <i class="fas fa-paper-plane"></i>
                                             </button>
                                         </div>
+                                        <div class="emoji-picker-container" id="emoji-picker-<?= $postId ?>" style="display: none;"></div>
                                     </form>
                                 </div>
 
@@ -619,12 +674,10 @@ $recommendedResult = $recommendedQuery->get_result();
                                                     <a href="profile.php?user_id=<?= $comment['user_id'] ?>" class="comment-author-name"><?= $comment['username'] ?></a>
                                                     <div class="comment-actions">
                                                         <span class="comment-date"><?= date('d M Y, H:i', strtotime($comment['created_at'])) ?></span>
-                                                        <a href="?id=<?= $postId ?>&like_comment_id=<?= $comment['id'] ?>" class="comment-like <?= $hasLikedComment ? 'liked' : '' ?>">
+                                                        <button class="comment-like <?= $hasLikedComment ? 'liked' : '' ?>" data-comment-id="<?= $comment['id'] ?>">
                                                             <i class="<?= $hasLikedComment ? 'fas' : 'far' ?> fa-heart"></i>
-                                                            <?php if ($likeCount > 0): ?>
-                                                                <span><?= $likeCount ?></span>
-                                                            <?php endif; ?>
-                                                        </a>
+                                                            <span class="comment-like-count"><?= $likeCount > 0 ? $likeCount : '' ?></span>
+                                                        </button>
                                                         <?php if ($comment['user_id'] == $userId || $post['user_id'] == $userId): ?>
                                                             <a href="?id=<?= $postId ?>&delete_comment_id=<?= $comment['id'] ?>" class="comment-delete" onclick="return confirm('¿Estás seguro de eliminar este comentario?')">
                                                                 <i class="fas fa-trash-alt"></i>
@@ -664,6 +717,7 @@ $recommendedResult = $recommendedQuery->get_result();
                     <div class="recommended-card">
                         <div class="recommended-header">
                             <h4>Sugerencias para ti</h4>
+                            <a href="#" class="see-all">Ver todo</a>
                         </div>
                         
                         <?php if ($recommendedResult->num_rows > 0): ?>
@@ -1157,6 +1211,134 @@ $recommendedResult = $recommendedQuery->get_result();
                 
                 // Limpiar campo de entrada
                 $('#chatInput').val('');
+            }
+        });
+
+        // Gestión de likes con AJAX
+        $(document).on('click', '.like-button', function(e) {
+            e.preventDefault();
+            
+            const button = $(this);
+            const postId = button.data('post-id');
+            
+            $.ajax({
+                url: 'like_ajax.php',
+                method: 'POST',
+                data: { post_id: postId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        if (response.action === 'like') {
+                            button.addClass('liked');
+                            button.find('i').removeClass('far').addClass('fas');
+                        } else {
+                            button.removeClass('liked');
+                            button.find('i').removeClass('fas').addClass('far');
+                        }
+                        button.find('.like-count').text(response.likeCount);
+                    }
+                }
+            });
+        });
+
+        // Gestión de likes de comentarios con AJAX
+        $(document).on('click', '.comment-like', function(e) {
+            e.preventDefault();
+            
+            const button = $(this);
+            const commentId = button.data('comment-id');
+            
+            $.ajax({
+                url: 'comment_like_ajax.php',
+                method: 'POST',
+                data: { comment_id: commentId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        if (response.action === 'like') {
+                            button.addClass('liked');
+                            button.find('i').removeClass('far').addClass('fas');
+                        } else {
+                            button.removeClass('liked');
+                            button.find('i').removeClass('fas').addClass('far');
+                        }
+                        
+                        const countSpan = button.find('.comment-like-count');
+                        if (response.likeCount > 0) {
+                            countSpan.text(response.likeCount);
+                        } else {
+                            countSpan.text('');
+                        }
+                    }
+                }
+            });
+        });
+
+        // Selector de emojis para comentarios
+        $(document).on('click', '.emoji-button', function(e) {
+            e.preventDefault();
+            
+            const postId = $(this).data('post-id');
+            const emojiPicker = $(`#emoji-picker-${postId}`);
+            
+            // Cerrar otros selectores de emojis abiertos
+            $('.emoji-picker-container').not(emojiPicker).hide();
+            
+            // Alternar la visibilidad del selector de emojis actual
+            emojiPicker.toggle();
+            
+            // Si el selector está vacío, inicializarlo
+            if (emojiPicker.is(':empty')) {
+                // Lista de emojis comunes
+                const commonEmojis = [
+                    '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', 
+                    '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', 
+                    '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', 
+                    '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', 
+                    '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', 
+                    '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', 
+                    '👍', '👎', '👏', '🙌', '🤝', '🙏', '✌️', '🤞', '🤟', '🤘'
+                ];
+                
+                // Crear el contenido del selector de emojis
+                let emojiContent = '<div class="emoji-grid">';
+                commonEmojis.forEach(emoji => {
+                    emojiContent += `<span class="emoji-item" data-emoji="${emoji}">${emoji}</span>`;
+                });
+                emojiContent += '</div>';
+                
+                emojiPicker.html(emojiContent);
+            }
+        });
+
+        // Insertar emoji en el campo de comentario
+        $(document).on('click', '.emoji-item', function() {
+            const emoji = $(this).data('emoji');
+            const postId = $(this).closest('.emoji-picker-container').attr('id').replace('emoji-picker-', '');
+            const inputField = $('#comment-input');
+            
+            // Insertar el emoji en la posición del cursor
+            const cursorPos = inputField[0].selectionStart;
+            const currentValue = inputField.val();
+            const newValue = currentValue.substring(0, cursorPos) + emoji + currentValue.substring(cursorPos);
+            
+            inputField.val(newValue);
+            
+            // Establecer el cursor después del emoji insertado
+            const newCursorPos = cursorPos + emoji.length;
+            inputField[0].setSelectionRange(newCursorPos, newCursorPos);
+            
+            // Enfocar el campo de entrada
+            inputField.focus();
+            
+            // Ocultar el selector de emojis
+            $(`#emoji-picker-${postId}`).hide();
+        });
+
+        // Cerrar el selector de emojis al hacer clic fuera de él
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.emoji-button, .emoji-picker-container').length) {
+                $('.emoji-picker-container').hide();
             }
         });
     </script>

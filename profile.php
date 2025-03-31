@@ -64,60 +64,6 @@ $chatUsersQuery->bind_param("i", $currentUserId);
 $chatUsersQuery->execute();
 $chatUsersResult = $chatUsersQuery->get_result();
 
-// Manejar el envío de likes
-if (isset($_GET['like_post_id'])) {
-    $likePostId = $_GET['like_post_id'];
-
-    // Verificar si ya le dio like a la publicación
-    $checkLikeQuery = $conn->prepare("SELECT id FROM likes WHERE user_id = ? AND post_id = ?");
-    $checkLikeQuery->bind_param("ii", $currentUserId, $likePostId);
-    $checkLikeQuery->execute();
-    $likeResult = $checkLikeQuery->get_result();
-
-    if ($likeResult->num_rows > 0) {
-        // Si ya le dio like, eliminar el like
-        $removeLikeQuery = $conn->prepare("DELETE FROM likes WHERE user_id = ? AND post_id = ?");
-        $removeLikeQuery->bind_param("ii", $currentUserId, $likePostId);
-        $removeLikeQuery->execute();
-    } else {
-        // Si no le dio like, agregar el like
-        $likeQuery = $conn->prepare("INSERT INTO likes (user_id, post_id) VALUES (?, ?)");
-        $likeQuery->bind_param("ii", $currentUserId, $likePostId);
-        $likeQuery->execute();
-    }
-    
-    // Redireccionar para evitar reenvío del formulario
-    header("Location: profile.php?user_id=" . $profileUserId);
-    exit;
-}
-
-// Manejar el envío de likes a los comentarios
-if (isset($_GET['like_comment_id'])) {
-    $likeCommentId = $_GET['like_comment_id'];
-
-    // Verificar si el usuario ya le dio like al comentario
-    $checkLikeQuery = $conn->prepare("SELECT id FROM comment_likes WHERE user_id = ? AND comment_id = ?");
-    $checkLikeQuery->bind_param("ii", $currentUserId, $likeCommentId);
-    $checkLikeQuery->execute();
-    $likeResult = $checkLikeQuery->get_result();
-
-    if ($likeResult->num_rows > 0) {
-        // Si ya le dio like, eliminar el like
-        $removeLikeQuery = $conn->prepare("DELETE FROM comment_likes WHERE user_id = ? AND comment_id = ?");
-        $removeLikeQuery->bind_param("ii", $currentUserId, $likeCommentId);
-        $removeLikeQuery->execute();
-    } else {
-        // Si no le dio like, agregar el like
-        $likeQuery = $conn->prepare("INSERT INTO comment_likes (user_id, comment_id) VALUES (?, ?)");
-        $likeQuery->bind_param("ii", $currentUserId, $likeCommentId);
-        $likeQuery->execute();
-    }
-    
-    // Redireccionar para evitar reenvío del formulario
-    header("Location: profile.php?user_id=" . $profileUserId);
-    exit;
-}
-
 // Manejar el envío de comentarios
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_text'])) {
     $postId = $_POST['post_id'];
@@ -157,7 +103,6 @@ if (isset($_GET['delete_comment_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $username ?> - Switch</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="shortcut icon" href="favicon.ico"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -255,6 +200,64 @@ if (isset($_GET['delete_comment_id'])) {
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;
+}
+.emoji-button {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.emoji-button:hover {
+    color: #007bff;
+}
+
+.emoji-picker-container {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 100%;
+    max-width: 320px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+}
+
+.emoji-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.emoji-item:hover {
+    background-color: #f1f1f1;
+}
+
+.post-content {
+    transition: background-color 0.2s;
+}
+
+.post-content:hover {
+    background-color: rgba(0,0,0,0.02);
 }
 </style>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -407,7 +410,7 @@ if (isset($_GET['delete_comment_id'])) {
                                     <?php endif; ?>
                                 </div>
                                 
-                                <div class="post-content">
+                                <div class="post-content" onclick="window.location.href='post.php?id=<?= $post['id'] ?>';" style="cursor: pointer;">
                                     <p><?= $post['content'] ?></p>
                                     
                                     <?php if (!empty($post['image_url'])): ?>
@@ -428,10 +431,10 @@ if (isset($_GET['delete_comment_id'])) {
                                 
                                 <div class="post-footer">
                                     <div class="post-stats">
-                                        <a href="?user_id=<?= $profileUserId ?>&like_post_id=<?= $post['id'] ?>" class="post-stat-item <?= $hasLiked ? 'liked' : '' ?>">
+                                        <button class="post-stat-item like-button <?= $hasLiked ? 'liked' : '' ?>" data-post-id="<?= $post['id'] ?>">
                                             <i class="<?= $hasLiked ? 'fas' : 'far' ?> fa-heart"></i>
-                                            <span><?= $likeCount ?></span>
-                                        </a>
+                                            <span class="like-count"><?= $likeCount ?></span>
+                                        </button>
                                         <button class="post-stat-item comment-toggle" data-post-id="<?= $post['id'] ?>">
                                             <i class="far fa-comment"></i>
                                             <span>Comentar</span>
@@ -449,10 +452,14 @@ if (isset($_GET['delete_comment_id'])) {
                                                 <img src="<?= $userData['profile_picture'] ?>" alt="Tu perfil" class="comment-user-img">
                                                 <div class="comment-input-container">
                                                     <input type="text" name="comment_text" placeholder="Escribe un comentario..." required class="comment-input">
+                                                    <button type="button" class="emoji-button" data-post-id="<?= $post['id'] ?>">
+                                                        <i class="far fa-smile"></i>
+                                                    </button>
                                                     <button type="submit" class="comment-submit">
                                                         <i class="fas fa-paper-plane"></i>
                                                     </button>
                                                 </div>
+                                                <div class="emoji-picker-container" id="emoji-picker-<?= $post['id'] ?>" style="display: none;"></div>
                                             </form>
                                         </div>
 
@@ -489,12 +496,10 @@ if (isset($_GET['delete_comment_id'])) {
                                                         <div class="comment-header">
                                                             <a href="profile.php?user_id=<?= $comment['user_id'] ?>" class="comment-author-name"><?= $comment['username'] ?></a>
                                                             <div class="comment-actions">
-                                                                <a href="?user_id=<?= $profileUserId ?>&like_comment_id=<?= $comment['id'] ?>" class="comment-like <?= $hasLikedComment ? 'liked' : '' ?>">
+                                                                <button class="comment-like <?= $hasLikedComment ? 'liked' : '' ?>" data-comment-id="<?= $comment['id'] ?>">
                                                                     <i class="<?= $hasLikedComment ? 'fas' : 'far' ?> fa-heart"></i>
-                                                                    <?php if ($likeCount > 0): ?>
-                                                                        <span><?= $likeCount ?></span>
-                                                                    <?php endif; ?>
-                                                                </a>
+                                                                    <span class="comment-like-count"><?= $likeCount > 0 ? $likeCount : '' ?></span>
+                                                                </button>
                                                                 <?php if ($comment['user_id'] == $currentUserId || $post['user_id'] == $currentUserId): ?>
                                                                     <a href="?user_id=<?= $profileUserId ?>&delete_comment_id=<?= $comment['id'] ?>" class="comment-delete" onclick="return confirm('¿Estás seguro de eliminar este comentario?')">
                                                                         <i class="fas fa-trash-alt"></i>
@@ -1019,6 +1024,137 @@ $(document).on('click', '.message-btn', function() {
                 $('#chatInput').val('');
             }
         });
+
+// Gestión de likes con AJAX
+$(document).on('click', '.like-button', function(e) {
+    e.preventDefault();
+    e.stopPropagation(); // Evitar que el clic se propague al contenedor de la publicación
+    
+    const button = $(this);
+    const postId = button.data('post-id');
+    
+    $.ajax({
+        url: 'like_ajax.php',
+        method: 'POST',
+        data: { post_id: postId },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                if (response.action === 'like') {
+                    button.addClass('liked');
+                    button.find('i').removeClass('far').addClass('fas');
+                } else {
+                    button.removeClass('liked');
+                    button.find('i').removeClass('fas').addClass('far');
+                }
+                button.find('.like-count').text(response.likeCount);
+            }
+        }
+    });
+});
+
+// Gestión de likes de comentarios con AJAX
+$(document).on('click', '.comment-like', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const button = $(this);
+    const commentId = button.data('comment-id');
+    
+    $.ajax({
+        url: 'comment_like_ajax.php',
+        method: 'POST',
+        data: { comment_id: commentId },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                if (response.action === 'like') {
+                    button.addClass('liked');
+                    button.find('i').removeClass('far').addClass('fas');
+                } else {
+                    button.removeClass('liked');
+                    button.find('i').removeClass('fas').addClass('far');
+                }
+                
+                const countSpan = button.find('.comment-like-count');
+                if (response.likeCount > 0) {
+                    countSpan.text(response.likeCount);
+                } else {
+                    countSpan.text('');
+                }
+            }
+        }
+    });
+});
+
+// Selector de emojis para comentarios
+$(document).on('click', '.emoji-button', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const postId = $(this).data('post-id');
+    const emojiPicker = $(`#emoji-picker-${postId}`);
+    
+    // Cerrar otros selectores de emojis abiertos
+    $('.emoji-picker-container').not(emojiPicker).hide();
+    
+    // Alternar la visibilidad del selector de emojis actual
+    emojiPicker.toggle();
+    
+    // Si el selector está vacío, inicializarlo
+    if (emojiPicker.is(':empty')) {
+        // Lista de emojis comunes
+        const commonEmojis = [
+            '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', 
+            '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', 
+            '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', 
+            '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', 
+            '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', 
+            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', 
+            '👍', '👎', '👏', '🙌', '🤝', '🙏', '✌️', '🤞', '🤟', '🤘'
+        ];
+        
+        // Crear el contenido del selector de emojis
+        let emojiContent = '<div class="emoji-grid">';
+        commonEmojis.forEach(emoji => {
+            emojiContent += `<span class="emoji-item" data-emoji="${emoji}">${emoji}</span>`;
+        });
+        emojiContent += '</div>';
+        
+        emojiPicker.html(emojiContent);
+    }
+});
+
+// Insertar emoji en el campo de comentario
+$(document).on('click', '.emoji-item', function() {
+    const emoji = $(this).data('emoji');
+    const postId = $(this).closest('.emoji-picker-container').attr('id').replace('emoji-picker-', '');
+    const inputField = $(this).closest('.post-comments').find('.comment-input');
+    
+    // Insertar el emoji en la posición del cursor
+    const cursorPos = inputField[0].selectionStart;
+    const currentValue = inputField.val();
+    const newValue = currentValue.substring(0, cursorPos) + emoji + currentValue.substring(cursorPos);
+    
+    inputField.val(newValue);
+    
+    // Establecer el cursor después del emoji insertado
+    const newCursorPos = cursorPos + emoji.length;
+    inputField[0].setSelectionRange(newCursorPos, newCursorPos);
+    
+    // Enfocar el campo de entrada
+    inputField.focus();
+    
+    // Ocultar el selector de emojis
+    $(`#emoji-picker-${postId}`).hide();
+});
+
+// Cerrar el selector de emojis al hacer clic fuera de él
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('.emoji-button, .emoji-picker-container').length) {
+        $('.emoji-picker-container').hide();
+    }
+});
     </script>
 </body>
 </html>

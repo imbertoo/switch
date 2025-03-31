@@ -392,7 +392,7 @@ $recommendedResult = $recommendedQuery->get_result();
                         <a href="#">Ayuda</a>
                         <a href="#">Privacidad</a>
                         <a href="#">Términos</a>
-                        <p>© 2023 Switch. Todos los derechos reservados.</p>
+                        <p>© 2025 Switch. Todos los derechos reservados.</p>
                     </div>
                 </div>
             </div>

@@ -9,6 +9,9 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
+// Determinar qué feed mostrar (siguiendo o para ti)
+$feedType = isset($_GET['feed']) ? $_GET['feed'] : 'siguiendo';
+
 // Manejar el envío de comentarios
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_text'])) {
     $postId = $_POST['post_id'];
@@ -91,22 +94,41 @@ $recommendedQuery->bind_param("ii", $userId, $userId);
 $recommendedQuery->execute();
 $recommendedResult = $recommendedQuery->get_result();
 
+// Obtener publicaciones según el tipo de feed seleccionado
+if ($feedType === 'siguiendo') {
+    // Feed "Siguiendo": Publicaciones del usuario y de las cuentas que sigue
+    $query = $conn->prepare("
+        SELECT posts.id, posts.content, posts.created_at, users.username, users.profile_picture, posts.user_id, posts.image_url, posts.video_url,
+               (SELECT COUNT(*) FROM likes WHERE post_id = posts.id) AS like_count
+        FROM posts 
+        JOIN users ON posts.user_id = users.id 
+        WHERE users.id = ? OR users.id IN (
+            SELECT friend_id FROM friends WHERE user_id = ?
+        )
+        ORDER BY posts.created_at DESC
+    ");
+    $query->bind_param("ii", $userId, $userId);
+} else {
+    // Feed "Para Ti": Publicaciones populares y recientes de cualquier usuario
+    // Modificado para asegurar que siempre muestre contenido
+    $query = $conn->prepare("
+        SELECT posts.id, posts.content, posts.created_at, users.username, users.profile_picture, posts.user_id, posts.image_url, posts.video_url,
+               (SELECT COUNT(*) FROM likes WHERE post_id = posts.id) AS like_count
+        FROM posts 
+        JOIN users ON posts.user_id = users.id 
+        WHERE users.id != ? -- Excluir al propio usuario
+        ORDER BY 
+            -- Primero mostrar publicaciones con más likes
+            like_count DESC, 
+            -- Luego por fecha (más recientes primero)
+            posts.created_at DESC
+        LIMIT 30
+    ");
+    $query->bind_param("i", $userId);
+}
 
-// Obtener publicaciones del usuario y de las cuentas que sigue
-$query = $conn->prepare("
-    SELECT posts.id, posts.content, posts.created_at, users.username, users.profile_picture, posts.user_id, posts.image_url, posts.video_url,
-           (SELECT COUNT(*) FROM likes WHERE post_id = posts.id) AS like_count
-    FROM posts 
-    JOIN users ON posts.user_id = users.id 
-    WHERE users.id = ? OR users.id IN (
-        SELECT friend_id FROM friends WHERE user_id = ?
-    )
-    ORDER BY posts.created_at DESC
-");
-$query->bind_param("ii", $userId, $userId);
 $query->execute();
 $result = $query->get_result();
-
 
 // Obtener datos del usuario
 $userQuery = $conn->prepare("SELECT username, profile_picture FROM users WHERE id = ?");
@@ -140,6 +162,56 @@ $chatUsersResult = $chatUsersQuery->get_result();
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .feed-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .feed-tab {
+            padding: 12px 20px;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .feed-tab.active {
+            color: var(--primary-color);
+        }
+        
+        .feed-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        .feed-tab:hover {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .post-clickable {
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .post-clickable:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        
+        /* Asegurarse de que los botones dentro de la publicación no activen la redirección */
+        .post-stats, .comment-form, .comments-list {
+            z-index: 2;
+            position: relative;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -198,6 +270,16 @@ $chatUsersResult = $chatUsersQuery->get_result();
             <div class="content-area">
                 <!-- Feed Section -->
                 <div class="feed-section">
+                    <!-- Feed Tabs -->
+                    <div class="feed-tabs">
+                        <a href="dashboard.php?feed=siguiendo" class="feed-tab <?= $feedType === 'siguiendo' ? 'active' : '' ?>">
+                            Siguiendo
+                        </a>
+                        <a href="dashboard.php?feed=parati" class="feed-tab <?= $feedType === 'parati' ? 'active' : '' ?>">
+                            Para Ti
+                        </a>
+                    </div>
+                    
                     <?php if ($result->num_rows > 0): ?>
                         <?php while ($post = $result->fetch_assoc()): ?>
                             <div class="post-card">
@@ -218,7 +300,7 @@ $chatUsersResult = $chatUsersQuery->get_result();
                                     <?php endif; ?>
                                 </div>
                                 
-                                <div class="post-content">
+                                <div class="post-content post-clickable" onclick="window.location.href='post.php?id=<?= $post['id'] ?>';">
                                     <p><?= $post['content'] ?></p>
                                     
                                     <?php if (!empty($post['image_url'])): ?>
@@ -247,9 +329,9 @@ $chatUsersResult = $chatUsersQuery->get_result();
                                     ?>
 
                                     <div class="post-stats">
-                                        <a href="?like_post_id=<?= $post['id'] ?>" class="post-stat-item <?= $hasLiked ? 'liked' : '' ?>">
+                                        <a href="javascript:void(0);" class="post-stat-item like-button <?= $hasLiked ? 'liked' : '' ?>" data-post-id="<?= $post['id'] ?>">
                                             <i class="<?= $hasLiked ? 'fas' : 'far' ?> fa-heart"></i>
-                                            <span><?= $post['like_count'] ?></span>
+                                            <span class="like-count"><?= $post['like_count'] ?></span>
                                         </a>
                                         <button class="post-stat-item comment-toggle" data-post-id="<?= $post['id'] ?>">
                                             <i class="far fa-comment"></i>
@@ -308,14 +390,14 @@ $chatUsersResult = $chatUsersQuery->get_result();
                                                         <div class="comment-header">
                                                             <a href="profile.php?user_id=<?= $comment['user_id'] ?>" class="comment-author-name"><?= $comment['username'] ?></a>
                                                             <div class="comment-actions">
-                                                                <a href="?like_comment_id=<?= $comment['id'] ?>" class="comment-like <?= $hasLikedComment ? 'liked' : '' ?>">
+                                                                <a href="javascript:void(0);" class="comment-like-button <?= $hasLikedComment ? 'liked' : '' ?>" data-comment-id="<?= $comment['id'] ?>">
                                                                     <i class="<?= $hasLikedComment ? 'fas' : 'far' ?> fa-heart"></i>
                                                                     <?php if ($likeCount > 0): ?>
-                                                                        <span><?= $likeCount ?></span>
+                                                                        <span class="comment-like-count"><?= $likeCount ?></span>
                                                                     <?php endif; ?>
                                                                 </a>
                                                                 <?php if ($comment['user_id'] == $userId || $post['user_id'] == $userId): ?>
-                                                                    <a href="?delete_comment_id=<?= $comment['id'] ?>" class="comment-delete" onclick="return confirm('¿Estás seguro de eliminar este comentario?')">
+                                                                    <a href="?delete_comment_id=<?= $comment['id'] ?>&feed=<?= $feedType ?>" class="comment-delete" onclick="return confirm('¿Estás seguro de eliminar este comentario?')">
                                                                         <i class="fas fa-trash-alt"></i>
                                                                     </a>
                                                                 <?php endif; ?>
@@ -342,9 +424,15 @@ $chatUsersResult = $chatUsersQuery->get_result();
                             <div class="no-posts-icon">
                                 <i class="far fa-newspaper"></i>
                             </div>
-                            <h3>No hay publicaciones</h3>
-                            <p>Sigue a más personas para ver sus publicaciones o crea tu primera publicación.</p>
-                            <a href="upload.php" class="btn-create-post">Crear publicación</a>
+                            <?php if ($feedType === 'siguiendo'): ?>
+                                <h3>No hay publicaciones</h3>
+                                <p>Sigue a más personas para ver sus publicaciones o crea tu primera publicación.</p>
+                                <a href="upload.php" class="btn-create-post">Crear publicación</a>
+                            <?php else: ?>
+                                <h3>No hay publicaciones disponibles</h3>
+                                <p>Parece que aún no hay contenido para mostrar. ¡Sé el primero en crear una publicación!</p>
+                                <a href="upload.php" class="btn-create-post">Crear publicación</a>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -452,7 +540,7 @@ $chatUsersResult = $chatUsersQuery->get_result();
     <script>
         function confirmDelete(postId) {
             if (confirm("¿Estás seguro de que deseas eliminar esta publicación?")) {
-                window.location.href = 'delete_post.php?id=' + postId;
+                window.location.href = 'delete_post.php?id=' + postId + '&feed=<?= $feedType ?>';
             }
         }
 
@@ -481,7 +569,8 @@ $chatUsersResult = $chatUsersQuery->get_result();
         });
 
         // Mostrar/ocultar comentarios
-        $(document).on('click', '.comment-toggle', function() {
+        $(document).on('click', '.comment-toggle', function(e) {
+            e.stopPropagation();
             const postId = $(this).data('post-id');
             $(`#comments-${postId}`).slideToggle();
         });
@@ -820,6 +909,82 @@ $chatUsersResult = $chatUsersQuery->get_result();
                 // Limpiar campo de entrada
                 $('#chatInput').val('');
             }
+
+            // Gestión de likes con AJAX
+            $(document).on('click', '.like-button', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const button = $(this);
+                const postId = button.data('post-id');
+                
+                $.ajax({
+                    url: 'like_ajax.php',
+                    method: 'POST',
+                    data: { post_id: postId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.action === 'like') {
+                                button.addClass('liked');
+                                button.find('i').removeClass('far').addClass('fas');
+                            } else {
+                                button.removeClass('liked');
+                                button.find('i').removeClass('fas').addClass('far');
+                            }
+                            button.find('.like-count').text(response.likeCount);
+                        }
+                    }
+                });
+            });
+
+            // Gestión de likes de comentarios con AJAX
+            $(document).on('click', '.comment-like-button', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const button = $(this);
+                const commentId = button.data('comment-id');
+                
+                $.ajax({
+                    url: 'comment_like_ajax.php',
+                    method: 'POST',
+                    data: { comment_id: commentId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.action === 'like') {
+                                button.addClass('liked');
+                                button.find('i').removeClass('far').addClass('fas');
+                            } else {
+                                button.removeClass('liked');
+                                button.find('i').removeClass('fas').addClass('far');
+                            }
+                            
+                            const countSpan = button.find('.comment-like-count');
+                            if (response.likeCount > 0) {
+                                countSpan.text(response.likeCount);
+                            } else {
+                                countSpan.text('');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Evitar que los clics en los elementos interactivos de la publicación se propaguen al contenedor
+            $(document).on('click', '.post-content a, .post-content button, .post-content form, .post-stats, .comment-form, .comments-list', function(e) {
+                e.stopPropagation();
+            });
+
+            // Añadir un indicador visual al hacer clic en una publicación
+            $(document).on('mousedown', '.post-clickable', function() {
+                $(this).css('background-color', 'rgba(0, 0, 0, 0.05)');
+            });
+
+            $(document).on('mouseup mouseleave', '.post-clickable', function() {
+                $(this).css('background-color', '');
+            });
         });
     </script>
 </body>
