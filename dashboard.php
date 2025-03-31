@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
 }
-
+//Prueba de commit y push
 $userId = $_SESSION['user_id'];
 
 // Determinar qué feed mostrar (siguiendo o para ti)
