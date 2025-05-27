@@ -6,7 +6,7 @@ ini_set('display_errors', 0); // No mostrar errores en producción
 // Configuración de base de datos
 $host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?? 'sql7.freesqldatabase.com';
 $username = $_ENV['DB_USER'] ?? getenv('DB_USER') ?? 'sql7781528';
-$password = $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?? 'mtsRqPrmHH';
+$password = $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?? 'enelgmail';
 $database = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?? 'sql7781528';
 $port = $_ENV['DB_PORT'] ?? getenv('DB_PORT') ?? 3306;
 
