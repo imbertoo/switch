@@ -1,5 +1,18 @@
 {
+    "name": "switch-social/app",
+    "description": "Red social estilo Twitter/Instagram",
+    "type": "project",
     "require": {
-        "cboden/ratchet": "^0.4.4"
+        "php": ">=8.0"
+    },
+    "config": {
+        "platform": {
+            "php": "8.2"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php -r \"if (!file_exists('uploads')) { mkdir('uploads', 0755, true); }\""
+        ]
     }
 }
