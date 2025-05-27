@@ -30,8 +30,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             
             $fileName = basename($_FILES["image"]["name"]);
-            
-            $fileName = basename($_FILES["image"]["name"]);
             $targetFile = $targetDir . time() . '_' . $fileName; // Añadir timestamp para evitar duplicados
             $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
@@ -164,7 +162,7 @@ $recommendedResult = $recommendedQuery->get_result();
         }
         
         .progress-bar {
-            background-color: #007bff;
+            background-color: var(--primary-color);
             transition: width 0.3s ease;
         }
 
@@ -182,7 +180,7 @@ $recommendedResult = $recommendedQuery->get_result();
         }
 
         .emoji-button:hover {
-            color: #007bff;
+            color: var(--primary-color);
         }
 
         .emoji-picker-container {
@@ -298,7 +296,7 @@ $recommendedResult = $recommendedQuery->get_result();
                             <div class="upload-options">
                                 <div class="upload-option">
                                     <div class="form-group">
-                                        <label>Añadir imagen</label>
+                                        <label><i class="fas fa-image"></i> Añadir imagen</label>
                                         <div class="file-input-container">
                                             <label for="image" class="file-input-label">
                                                 <i class="fas fa-image"></i> Seleccionar imagen
@@ -318,7 +316,7 @@ $recommendedResult = $recommendedQuery->get_result();
                                 
                                 <div class="upload-option">
                                     <div class="form-group">
-                                        <label>Añadir video</label>
+                                        <label><i class="fas fa-video"></i> Añadir video</label>
                                         <div class="file-input-container">
                                             <label for="video" class="file-input-label">
                                                 <i class="fas fa-video"></i> Seleccionar video
@@ -358,41 +356,8 @@ $recommendedResult = $recommendedQuery->get_result();
                             </div>
                         </a>
                     </div>
-
-                    <div class="recommended-card">
-                        <div class="recommended-header">
-                            <h4>Sugerencias para ti</h4>
-                            <a href="#" class="see-all">Ver todo</a>
-                        </div>
-                        
-                        <?php if ($recommendedResult->num_rows > 0): ?>
-                            <div class="recommended-list">
-                                <?php while ($recommendation = $recommendedResult->fetch_assoc()): ?>
-                                    <div class="recommended-item">
-                                        <a href="profile.php?user_id=<?= $recommendation['id'] ?>" class="recommended-user">
-                                            <img src="<?= $recommendation['profile_picture'] ?>" alt="<?= $recommendation['username'] ?>" class="recommended-user-img">
-                                            <div class="recommended-user-info">
-                                                <h5><?= $recommendation['username'] ?></h5>
-                                                <p>Sugerido para ti</p>
-                                            </div>
-                                        </a>
-                                        <button class="btn-follow" data-user-id="<?= $recommendation['id'] ?>">Seguir</button>
-                                    </div>
-                                <?php endwhile; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="no-recommendations">
-                                <p>No hay sugerencias disponibles en este momento.</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
                     <div class="footer-links">
-                        <a href="#">Acerca de</a>
-                        <a href="#">Ayuda</a>
-                        <a href="#">Privacidad</a>
-                        <a href="#">Términos</a>
-                        <p>© 2025 Switch. Todos los derechos reservados.</p>
+                        <p>© 202 Switch. Todos los derechos reservados.</p>
                     </div>
                 </div>
             </div>
@@ -425,7 +390,7 @@ $recommendedResult = $recommendedQuery->get_result();
                     <img src="<?= $chatUser['profile_picture'] ?>" alt="<?= $chatUser['username'] ?>">
                     <div class="user-item-info">
                         <span class="user-item-name"><?= $chatUser['username'] ?></span>
-                        <span class="user-item-status">Pulsa para abrir el chat</span>
+                        <span class="user-item-status">En línea</span>
                     </div>
                     <span class="unread-badge" style="display: none;">0</span>
                 </div>

@@ -83,9 +83,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </form>
         
+        <div class="forgot-password">
+            <a href="forgot_password.php" class="forgot-link">
+                <i class="fas fa-key"></i> ¿Olvidaste tu contraseña?
+            </a>
+        </div>
+        
         <div class="login-footer">
             <p>¿No tienes cuenta? <a href="register.php">Regístrate aquí</a></p>
-            <p><a href="#">¿Olvidaste tu contraseña?</a></p>
         </div>
     </div>
 
@@ -123,6 +128,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .input-with-icon input {
             padding-left: 40px;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .forgot-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .forgot-link:hover {
+            color: var(--secondary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .forgot-link i {
+            font-size: 0.8rem;
         }
     </style>
 </body>

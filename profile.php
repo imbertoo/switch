@@ -21,7 +21,7 @@ $userData = $userQuery->get_result()->fetch_assoc();
 
 // Si no se encuentran los datos del usuario, asignar valores predeterminados
 $username = isset($userData['username']) ? htmlspecialchars($userData['username']) : 'Usuario desconocido';
-$profilePicture = isset($userData['profile_picture']) ? htmlspecialchars($userData['profile_picture']) : 'default-profile.png'; // Usar una imagen predeterminada si no se encuentra
+$profilePicture = isset($userData['profile_picture']) ? htmlspecialchars($userData['profile_picture']) : 'default-profile.png';
 
 // Obtener número de publicaciones del usuario
 $postCountQuery = $conn->prepare("SELECT COUNT(*) as total_posts FROM posts WHERE user_id = ?");
@@ -64,20 +64,7 @@ $chatUsersQuery->bind_param("i", $currentUserId);
 $chatUsersQuery->execute();
 $chatUsersResult = $chatUsersQuery->get_result();
 
-// Manejar el envío de comentarios
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_text'])) {
-    $postId = $_POST['post_id'];
-    $commentText = $_POST['comment_text'];
-    $commentQuery = $conn->prepare("INSERT INTO comments (user_id, post_id, comment_text) VALUES (?, ?, ?)");
-    $commentQuery->bind_param("iis", $currentUserId, $postId, $commentText);
-    $commentQuery->execute();
-    
-    // Redireccionar para evitar reenvío del formulario
-    header("Location: profile.php?user_id=" . $profileUserId);
-    exit;
-}
-
-// Manejar el envío de eliminación de comentarios
+// Manejar el envío de eliminación de comentarios (mantener para compatibilidad)
 if (isset($_GET['delete_comment_id'])) {
     $deleteCommentId = $_GET['delete_comment_id'];
 
@@ -263,6 +250,21 @@ if (isset($_GET['delete_comment_id'])) {
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+    .post-clickable {
+        transition: background-color 0.2s ease;
+    }
+    
+    .post-clickable:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    /* Asegurarse de que los botones dentro de la publicación no activen la redirección */
+    .post-stats, .comment-form, .comments-list {
+        z-index: 2;
+        position: relative;
+    }
+</style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -410,7 +412,7 @@ if (isset($_GET['delete_comment_id'])) {
                                     <?php endif; ?>
                                 </div>
                                 
-                                <div class="post-content" onclick="window.location.href='post.php?id=<?= $post['id'] ?>';" style="cursor: pointer;">
+                                <div class="post-content post-clickable" onclick="window.location.href='post.php?id=<?= $post['id'] ?>';" style="cursor: pointer;">
                                     <p><?= $post['content'] ?></p>
                                     
                                     <?php if (!empty($post['image_url'])): ?>
@@ -431,25 +433,20 @@ if (isset($_GET['delete_comment_id'])) {
                                 
                                 <div class="post-footer">
                                     <div class="post-stats">
-                                        <button class="post-stat-item like-button <?= $hasLiked ? 'liked' : '' ?>" data-post-id="<?= $post['id'] ?>">
+                                        <a href="javascript:void(0);" class="post-stat-item <?= $hasLiked ? 'liked' : '' ?> like-button" data-post-id="<?= $post['id'] ?>">
                                             <i class="<?= $hasLiked ? 'fas' : 'far' ?> fa-heart"></i>
                                             <span class="like-count"><?= $likeCount ?></span>
-                                        </button>
+                                        </a>
                                         <button class="post-stat-item comment-toggle" data-post-id="<?= $post['id'] ?>">
                                             <i class="far fa-comment"></i>
                                             <span>Comentar</span>
-                                        </button>
-                                        <button class="post-stat-item">
-                                            <i class="far fa-share-square"></i>
-                                            <span>Compartir</span>
                                         </button>
                                     </div>
 
                                     <div class="post-comments" id="comments-<?= $post['id'] ?>">
                                         <div class="comment-form">
-                                            <form method="POST" action="?user_id=<?= $profileUserId ?>" class="comment-input-form">
-                                                <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
-                                                <img src="<?= $userData['profile_picture'] ?>" alt="Tu perfil" class="comment-user-img">
+                                            <form class="comment-input-form" data-post-id="<?= $post['id'] ?>">
+                                                <img src="<?= $currentUserData['profile_picture'] ?>" alt="Tu perfil" class="comment-user-img">
                                                 <div class="comment-input-container">
                                                     <input type="text" name="comment_text" placeholder="Escribe un comentario..." required class="comment-input">
                                                     <button type="button" class="emoji-button" data-post-id="<?= $post['id'] ?>">
@@ -463,7 +460,7 @@ if (isset($_GET['delete_comment_id'])) {
                                             </form>
                                         </div>
 
-                                        <div class="comments-list">
+                                        <div class="comments-list" id="comments-list-<?= $post['id'] ?>">
                                             <?php
                                             $commentsQuery = $conn->prepare("SELECT comments.id, comments.comment_text, comments.user_id, users.username, users.profile_picture 
                                                                             FROM comments 
@@ -496,11 +493,11 @@ if (isset($_GET['delete_comment_id'])) {
                                                         <div class="comment-header">
                                                             <a href="profile.php?user_id=<?= $comment['user_id'] ?>" class="comment-author-name"><?= $comment['username'] ?></a>
                                                             <div class="comment-actions">
-                                                                <button class="comment-like <?= $hasLikedComment ? 'liked' : '' ?>" data-comment-id="<?= $comment['id'] ?>">
+                                                                <a href="javascript:void(0);" class="comment-like <?= $hasLikedComment ? 'liked' : '' ?> comment-like-button" data-comment-id="<?= $comment['id'] ?>">
                                                                     <i class="<?= $hasLikedComment ? 'fas' : 'far' ?> fa-heart"></i>
                                                                     <span class="comment-like-count"><?= $likeCount > 0 ? $likeCount : '' ?></span>
-                                                                </button>
-                                                                <?php if ($comment['user_id'] == $currentUserId || $post['user_id'] == $currentUserId): ?>
+                                                                </a>
+                                                                <?php if ($comment['user_id'] == $currentUserId || $profileUserId == $currentUserId): ?>
                                                                     <a href="?user_id=<?= $profileUserId ?>&delete_comment_id=<?= $comment['id'] ?>" class="comment-delete" onclick="return confirm('¿Estás seguro de eliminar este comentario?')">
                                                                         <i class="fas fa-trash-alt"></i>
                                                                     </a>
@@ -630,64 +627,70 @@ if (isset($_GET['delete_comment_id'])) {
 
         // Seguir/Dejar de seguir a un usuario
         $(document).on('click', '.follow-btn', function() {
-    const button = $(this);
-    const userId = button.data('user-id');
-    const isFollowing = button.hasClass('btn-danger');
-    
-    // Cambiar el estado del botón
-    button.prop('disabled', true).text('Procesando...');
-    
-    // Enviar solicitud AJAX
-    $.ajax({
-        url: 'follow_ajax.php',
-        method: 'POST',
-        data: { 
-            follow_user_id: userId,
-            action: isFollowing ? 'unfollow' : 'follow'
-        },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                if (isFollowing) {
-                    button.removeClass('btn-danger').addClass('btn-primary');
-                    button.html('<i class="fas fa-user-plus"></i> Seguir');
-                } else {
-                    button.removeClass('btn-primary').addClass('btn-danger');
-                    button.html('<i class="fas fa-user-minus"></i> Dejar de seguir');
+            const button = $(this);
+            const userId = button.data('user-id');
+            const isFollowing = button.hasClass('btn-danger');
+            
+            // Guardar el estado original del botón para restaurarlo en caso de error
+            const originalHtml = button.html();
+            const originalClass = isFollowing ? 'btn-danger' : 'btn-primary';
+            
+            // Cambiar el estado del botón temporalmente mientras se procesa
+            button.prop('disabled', true);
+            button.text('Procesando...');
+            
+            // Enviar solicitud AJAX
+            $.ajax({
+                url: 'follow_ajax.php',
+                method: 'POST',
+                data: { 
+                    follow_user_id: userId,
+                    action: isFollowing ? 'unfollow' : 'follow'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        if (isFollowing) {
+                            // Cambiar de "Dejar de seguir" a "Seguir"
+                            button.removeClass('btn-danger').addClass('btn-primary');
+                            button.html('<i class="fas fa-user-plus"></i> Seguir');
+                        } else {
+                            // Cambiar de "Seguir" a "Dejar de seguir"
+                            button.removeClass('btn-primary').addClass('btn-danger');
+                            button.html('<i class="fas fa-user-minus"></i> Dejar de seguir');
+                        }
+                        // Actualizar contador de seguidores sin recargar la página
+                        const currentCount = parseInt($('.profile-stat-count').eq(1).text());
+                        $('.profile-stat-count').eq(1).text(isFollowing ? currentCount - 1 : currentCount + 1);
+                    } else {
+                        console.log('Error: ' + response.message);
+                        // Restaurar el botón a su estado original
+                        button.removeClass('btn-primary btn-danger').addClass(originalClass);
+                        button.html(originalHtml);
+                    }
+                    button.prop('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error en la solicitud: ' + error);
+                    // Restaurar el botón a su estado original
+                    button.prop('disabled', false);
+                    button.removeClass('btn-primary btn-danger').addClass(originalClass);
+                    button.html(originalHtml);
                 }
-                // Actualizar contador de seguidores sin recargar la página
-                const currentCount = parseInt($('.profile-stat-count').eq(1).text());
-                $('.profile-stat-count').eq(1).text(isFollowing ? currentCount - 1 : currentCount + 1);
-            } else {
-                console.log('Error: ' + response.message);
-                // No mostrar alerta, solo registrar en consola
-            }
-            button.prop('disabled', false);
-        },
-        error: function(xhr, status, error) {
-            console.log('Error en la solicitud: ' + error);
-            // Restaurar el botón sin mostrar alerta
-            button.prop('disabled', false);
-            if (isFollowing) {
-                button.html('<i class="fas fa-user-minus"></i> Dejar de seguir');
-            } else {
-                button.html('<i class="fas fa-user-plus"></i> Seguir');
-            }
-        }
-    });
-});
+            });
+        });
 
-// Abrir chat con el usuario del perfil
-$(document).on('click', '.message-btn', function() {
-    const userId = $(this).data('user-id');
-    const username = $(this).data('username');
-    
-    // Mostrar el panel de chat
-    $('#chatPanel').show();
-    
-    // Seleccionar el usuario
-    selectUser(userId, username);
-});
+        // Abrir chat con el usuario del perfil
+        $(document).on('click', '.message-btn', function() {
+            const userId = $(this).data('user-id');
+            const username = $(this).data('username');
+            
+            // Mostrar el panel de chat
+            $('#chatPanel').show();
+            
+            // Seleccionar el usuario
+            selectUser(userId, username);
+        });
 
         // Variables para el chat
         let socket;
@@ -956,6 +959,40 @@ $(document).on('click', '.message-btn', function() {
             selectedUsername = null;
         }
 
+        // Función para crear el HTML de un comentario
+        function createCommentHTML(comment) {
+            const currentUserId = <?= $currentUserId ?>;
+            const profileUserId = <?= $profileUserId ?>;
+            
+            let deleteButton = '';
+            if (comment.user_id == currentUserId || profileUserId == currentUserId) {
+                deleteButton = `
+                    <a href="?user_id=${profileUserId}&delete_comment_id=${comment.id}" class="comment-delete" onclick="return confirm('¿Estás seguro de eliminar este comentario?')">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                `;
+            }
+            
+            return `
+                <div class="comment-item">
+                    <img src="${comment.profile_picture}" alt="${comment.username}" class="comment-author-img">
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <a href="profile.php?user_id=${comment.user_id}" class="comment-author-name">${comment.username}</a>
+                            <div class="comment-actions">
+                                <a href="javascript:void(0);" class="comment-like comment-like-button" data-comment-id="${comment.id}">
+                                    <i class="far fa-heart"></i>
+                                    <span class="comment-like-count"></span>
+                                </a>
+                                ${deleteButton}
+                            </div>
+                        </div>
+                        <p class="comment-text">${comment.comment_text}</p>
+                    </div>
+                </div>
+            `;
+        }
+
         // Cuando el documento esté listo
         $(document).ready(function() {
             // Inicializar WebSocket
@@ -1023,138 +1060,211 @@ $(document).on('click', '.message-btn', function() {
                 // Limpiar campo de entrada
                 $('#chatInput').val('');
             }
-        });
 
-// Gestión de likes con AJAX
-$(document).on('click', '.like-button', function(e) {
-    e.preventDefault();
-    e.stopPropagation(); // Evitar que el clic se propague al contenedor de la publicación
-    
-    const button = $(this);
-    const postId = button.data('post-id');
-    
-    $.ajax({
-        url: 'like_ajax.php',
-        method: 'POST',
-        data: { post_id: postId },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                if (response.action === 'like') {
-                    button.addClass('liked');
-                    button.find('i').removeClass('far').addClass('fas');
-                } else {
-                    button.removeClass('liked');
-                    button.find('i').removeClass('fas').addClass('far');
-                }
-                button.find('.like-count').text(response.likeCount);
-            }
-        }
-    });
-});
-
-// Gestión de likes de comentarios con AJAX
-$(document).on('click', '.comment-like', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const button = $(this);
-    const commentId = button.data('comment-id');
-    
-    $.ajax({
-        url: 'comment_like_ajax.php',
-        method: 'POST',
-        data: { comment_id: commentId },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                if (response.action === 'like') {
-                    button.addClass('liked');
-                    button.find('i').removeClass('far').addClass('fas');
-                } else {
-                    button.removeClass('liked');
-                    button.find('i').removeClass('fas').addClass('far');
+            // Gestión de comentarios con AJAX
+            $(document).on('submit', '.comment-input-form', function(e) {
+                e.preventDefault();
+                
+                const form = $(this);
+                const postId = form.data('post-id');
+                const commentText = form.find('input[name="comment_text"]').val().trim();
+                
+                if (!commentText) {
+                    return;
                 }
                 
-                const countSpan = button.find('.comment-like-count');
-                if (response.likeCount > 0) {
-                    countSpan.text(response.likeCount);
-                } else {
-                    countSpan.text('');
+                // Deshabilitar el formulario mientras se envía
+                form.find('input, button').prop('disabled', true);
+                
+                $.ajax({
+                    url: 'comment_ajax.php',
+                    method: 'POST',
+                    data: {
+                        post_id: postId,
+                        comment_text: commentText
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            // Limpiar el campo de entrada
+                            form.find('input[name="comment_text"]').val('');
+                            
+                            // Agregar el nuevo comentario al inicio de la lista
+                            const commentsList = $(`#comments-list-${postId}`);
+                            const noCommentsDiv = commentsList.find('.no-comments');
+                            
+                            if (noCommentsDiv.length > 0) {
+                                noCommentsDiv.remove();
+                            }
+                            
+                            const newCommentHTML = createCommentHTML(response.comment);
+                            commentsList.prepend(newCommentHTML);
+                            
+                            // Mostrar los comentarios si están ocultos
+                            $(`#comments-${postId}`).show();
+                        } else {
+                            alert('Error al enviar el comentario: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error en la solicitud: ' + error);
+                        alert('Error al enviar el comentario. Por favor, inténtalo de nuevo.');
+                    },
+                    complete: function() {
+                        // Rehabilitar el formulario
+                        form.find('input, button').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Gestión de likes con AJAX
+            $(document).on('click', '.like-button', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Evitar que el clic se propague al contenedor de la publicación
+                
+                const button = $(this);
+                const postId = button.data('post-id');
+                
+                $.ajax({
+                    url: 'like_ajax.php',
+                    method: 'POST',
+                    data: { post_id: postId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.action === 'like') {
+                                button.addClass('liked');
+                                button.find('i').removeClass('far').addClass('fas');
+                            } else {
+                                button.removeClass('liked');
+                                button.find('i').removeClass('fas').addClass('far');
+                            }
+                            button.find('.like-count').text(response.likeCount);
+                        }
+                    }
+                });
+            });
+
+            // Gestión de likes de comentarios con AJAX
+            $(document).on('click', '.comment-like-button', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const button = $(this);
+                const commentId = button.data('comment-id');
+                
+                $.ajax({
+                    url: 'comment_like_ajax.php',
+                    method: 'POST',
+                    data: { comment_id: commentId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.action === 'like') {
+                                button.addClass('liked');
+                                button.find('i').removeClass('far').addClass('fas');
+                            } else {
+                                button.removeClass('liked');
+                                button.find('i').removeClass('fas').addClass('far');
+                            }
+                            
+                            const countSpan = button.find('.comment-like-count');
+                            if (response.likeCount > 0) {
+                                countSpan.text(response.likeCount);
+                            } else {
+                                countSpan.text('');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Selector de emojis para comentarios
+            $(document).on('click', '.emoji-button', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const form = $(this).closest('form');
+                const postId = form.find('input[name="comment_text"]').closest('form').data('post-id');
+                const emojiPicker = $(`#emoji-picker-${postId}`);
+                
+                // Cerrar otros selectores de emojis abiertos
+                $('.emoji-picker-container').not(emojiPicker).hide();
+                
+                // Alternar la visibilidad del selector de emojis actual
+                emojiPicker.toggle();
+                
+                // Si el selector está vacío, inicializarlo
+                if (emojiPicker.is(':empty')) {
+                    // Lista de emojis comunes
+                    const commonEmojis = [
+                        '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', 
+                        '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', 
+                        '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', 
+                        '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', 
+                        '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', 
+                        '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', 
+                        '👍', '👎', '👏', '🙌', '🤝', '🙏', '✌️', '🤞', '🤟', '🤘'
+                    ];
+                    
+                    // Crear el contenido del selector de emojis
+                    let emojiContent = '<div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px;">';
+                    commonEmojis.forEach(emoji => {
+                        emojiContent += `<span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; cursor: pointer; border-radius: 4px; transition: background-color 0.2s;" class="emoji-item" data-emoji="${emoji}">${emoji}</span>`;
+                    });
+                    emojiContent += '</div>';
+                    
+                    emojiPicker.html(emojiContent);
                 }
-            }
-        }
-    });
-});
+            });
 
-// Selector de emojis para comentarios
-$(document).on('click', '.emoji-button', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const postId = $(this).data('post-id');
-    const emojiPicker = $(`#emoji-picker-${postId}`);
-    
-    // Cerrar otros selectores de emojis abiertos
-    $('.emoji-picker-container').not(emojiPicker).hide();
-    
-    // Alternar la visibilidad del selector de emojis actual
-    emojiPicker.toggle();
-    
-    // Si el selector está vacío, inicializarlo
-    if (emojiPicker.is(':empty')) {
-        // Lista de emojis comunes
-        const commonEmojis = [
-            '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', 
-            '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', 
-            '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', 
-            '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', 
-            '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', 
-            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', 
-            '👍', '👎', '👏', '🙌', '🤝', '🙏', '✌️', '🤞', '🤟', '🤘'
-        ];
-        
-        // Crear el contenido del selector de emojis
-        let emojiContent = '<div class="emoji-grid">';
-        commonEmojis.forEach(emoji => {
-            emojiContent += `<span class="emoji-item" data-emoji="${emoji}">${emoji}</span>`;
+            // Insertar emoji en el campo de comentario
+            $(document).on('click', '.emoji-item', function() {
+                const emoji = $(this).data('emoji');
+                const form = $(this).closest('form');
+                const inputField = form.find('.comment-input');
+                
+                // Insertar el emoji en la posición del cursor
+                const cursorPos = inputField[0].selectionStart;
+                const currentValue = inputField.val();
+                const newValue = currentValue.substring(0, cursorPos) + emoji + currentValue.substring(cursorPos);
+                
+                inputField.val(newValue);
+                
+                // Establecer el cursor después del emoji insertado
+                const newCursorPos = cursorPos + emoji.length;
+                inputField[0].setSelectionRange(newCursorPos, newCursorPos);
+                
+                // Enfocar el campo de entrada
+                inputField.focus();
+                
+                // Ocultar el selector de emojis
+                $(this).closest('.emoji-picker-container').hide();
+            });
+
+            // Cerrar el selector de emojis al hacer clic fuera de él
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.emoji-button, .emoji-picker-container').length) {
+                    $('.emoji-picker-container').hide();
+                }
+            });
+
+            // Evitar que los clics en los elementos interactivos de la publicación se propaguen al contenedor
+            $(document).on('click', '.post-content a, .post-content button, .post-content form, .post-stats, .comment-form, .comments-list', function(e) {
+                e.stopPropagation();
+            });
+
+            // Añadir un indicador visual al hacer clic en una publicación
+            $(document).on('mousedown', '.post-clickable', function() {
+                $(this).css('background-color', 'rgba(0, 0, 0, 0.05)');
+            });
+
+            $(document).on('mouseup mouseleave', '.post-clickable', function() {
+                $(this).css('background-color', '');
+            });
         });
-        emojiContent += '</div>';
-        
-        emojiPicker.html(emojiContent);
-    }
-});
-
-// Insertar emoji en el campo de comentario
-$(document).on('click', '.emoji-item', function() {
-    const emoji = $(this).data('emoji');
-    const postId = $(this).closest('.emoji-picker-container').attr('id').replace('emoji-picker-', '');
-    const inputField = $(this).closest('.post-comments').find('.comment-input');
-    
-    // Insertar el emoji en la posición del cursor
-    const cursorPos = inputField[0].selectionStart;
-    const currentValue = inputField.val();
-    const newValue = currentValue.substring(0, cursorPos) + emoji + currentValue.substring(cursorPos);
-    
-    inputField.val(newValue);
-    
-    // Establecer el cursor después del emoji insertado
-    const newCursorPos = cursorPos + emoji.length;
-    inputField[0].setSelectionRange(newCursorPos, newCursorPos);
-    
-    // Enfocar el campo de entrada
-    inputField.focus();
-    
-    // Ocultar el selector de emojis
-    $(`#emoji-picker-${postId}`).hide();
-});
-
-// Cerrar el selector de emojis al hacer clic fuera de él
-$(document).on('click', function(e) {
-    if (!$(e.target).closest('.emoji-button, .emoji-picker-container').length) {
-        $('.emoji-picker-container').hide();
-    }
-});
     </script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="video-player.js"></script>
 </body>
 </html>

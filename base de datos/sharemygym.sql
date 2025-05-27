@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 31-03-2025 a las 23:35:33
+-- Tiempo de generación: 27-05-2025 a las 15:16:04
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -56,7 +56,20 @@ CREATE TABLE `comments` (
 INSERT INTO `comments` (`id`, `user_id`, `post_id`, `comment_text`, `created_at`) VALUES
 (10, 1, 11, 'sii', '2025-01-23 19:20:10'),
 (15, 1, 14, 'mola', '2025-03-28 00:20:18'),
-(17, 1, 18, 'jajaj chema', '2025-03-28 01:24:54');
+(17, 1, 18, 'jajaj chema', '2025-03-28 01:24:54'),
+(21, 14, 32, 'hola!', '2025-05-06 16:39:05'),
+(22, 14, 41, 'mola', '2025-05-06 16:39:14'),
+(23, 14, 59, 'hola!', '2025-05-06 16:39:19'),
+(24, 14, 29, 'te comento', '2025-05-26 16:13:50'),
+(25, 14, 20, 'me alegro!', '2025-05-26 16:14:03'),
+(26, 14, 20, 'sii ', '2025-05-26 16:14:49'),
+(27, 14, 26, 'mola👍', '2025-05-26 16:15:43'),
+(28, 1, 74, 'mola', '2025-05-26 16:37:40'),
+(29, 1, 74, 'te comento', '2025-05-26 16:37:47'),
+(31, 1, 74, '👍😄', '2025-05-26 16:43:44'),
+(32, 1, 20, '👍', '2025-05-26 16:44:01'),
+(33, 1, 74, '🤘', '2025-05-26 16:47:02'),
+(34, 14, 65, 'me la pela tio', '2025-05-26 22:12:03');
 
 -- --------------------------------------------------------
 
@@ -129,7 +142,6 @@ INSERT INTO `friends` (`id`, `user_id`, `friend_id`, `status`, `created_at`) VAL
 (1, 1, 2, 'accepted', '2024-10-03 14:26:35'),
 (2, 1, 3, 'accepted', '2024-10-03 14:26:35'),
 (3, 1, 4, 'accepted', '2024-10-03 14:26:35'),
-(4, 1, 5, 'accepted', '2024-10-03 14:26:35'),
 (5, 2, 3, 'accepted', '2024-10-03 14:26:35'),
 (6, 2, 4, 'accepted', '2024-10-03 14:26:35'),
 (7, 2, 5, 'accepted', '2024-10-03 14:26:35'),
@@ -146,11 +158,8 @@ INSERT INTO `friends` (`id`, `user_id`, `friend_id`, `status`, `created_at`) VAL
 (18, 5, 2, 'accepted', '2024-10-03 14:26:35'),
 (19, 5, 3, 'accepted', '2024-10-03 14:26:35'),
 (20, 5, 4, 'accepted', '2024-10-03 14:26:35'),
-(22, 14, 2, 'accepted', '2025-01-23 17:58:02'),
 (24, 14, 1, 'accepted', '2025-01-23 19:25:18'),
 (29, 15, 1, 'accepted', '2025-03-26 14:15:35'),
-(33, 14, 4, 'accepted', '2025-03-27 23:39:35'),
-(34, 14, 15, 'accepted', '2025-03-28 00:17:15'),
 (35, 15, 2, 'accepted', '2025-03-28 00:23:50'),
 (39, 1, 14, 'accepted', '2025-03-28 00:36:40'),
 (41, 1, 15, 'accepted', '2025-03-31 13:11:10'),
@@ -159,7 +168,12 @@ INSERT INTO `friends` (`id`, `user_id`, `friend_id`, `status`, `created_at`) VAL
 (45, 19, 15, 'accepted', '2025-03-31 13:49:00'),
 (46, 20, 1, 'accepted', '2025-03-31 21:31:18'),
 (47, 20, 14, 'accepted', '2025-03-31 21:31:21'),
-(48, 1, 20, 'accepted', '2025-03-31 21:31:57');
+(48, 1, 20, 'accepted', '2025-03-31 21:31:57'),
+(52, 1, 5, 'accepted', '2025-05-06 16:34:20'),
+(53, 14, 2, 'accepted', '2025-05-06 16:38:34'),
+(55, 14, 15, 'accepted', '2025-05-06 16:39:25'),
+(57, 14, 4, 'accepted', '2025-05-26 16:20:54'),
+(59, 14, 3, 'accepted', '2025-05-26 22:14:28');
 
 -- --------------------------------------------------------
 
@@ -182,7 +196,23 @@ INSERT INTO `likes` (`id`, `user_id`, `post_id`, `created_at`) VALUES
 (24, 1, 11, '2025-01-24 19:50:18'),
 (26, 14, 11, '2025-03-26 00:22:32'),
 (49, 1, 18, '2025-03-31 13:11:15'),
-(55, 20, 20, '2025-03-31 21:31:32');
+(55, 20, 20, '2025-03-31 21:31:32'),
+(58, 14, 65, '2025-05-26 22:11:58');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `password_reset_tokens`
+--
+
+CREATE TABLE `password_reset_tokens` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `used` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -234,7 +264,6 @@ INSERT INTO `posts` (`id`, `user_id`, `content`, `image_url`, `video_url`, `crea
 (44, 14, 'Tengo ganas de hacer algo diferente este fin de semana.', NULL, NULL, '2025-03-31 21:26:08'),
 (45, 15, 'Me puse a organizar mi escritorio, ahora todo está en orden.', NULL, NULL, '2025-03-31 21:26:08'),
 (46, 19, 'A veces el silencio es lo mejor para concentrarse.', NULL, NULL, '2025-03-31 21:26:08'),
-(47, 1, 'Intentando dejar de procrastinar... otra vez.', NULL, NULL, '2025-03-31 21:26:08'),
 (48, 2, 'Hoy me desperté con mucha energía, qué raro.', NULL, NULL, '2025-03-31 21:26:08'),
 (49, 3, 'Caminé por el parque y fue muy relajante.', NULL, NULL, '2025-03-31 21:26:08'),
 (50, 4, 'Escuché un podcast muy interesante hoy.', NULL, NULL, '2025-03-31 21:26:08'),
@@ -261,7 +290,8 @@ INSERT INTO `posts` (`id`, `user_id`, `content`, `image_url`, `video_url`, `crea
 (71, 14, 'Escuchar música mientras trabajo me motiva.', NULL, NULL, '2025-03-31 21:26:08'),
 (72, 15, 'Hoy aprendí algo nuevo, eso siempre es bueno.', NULL, NULL, '2025-03-31 21:26:08'),
 (73, 19, 'Planificando un viaje, a ver si se da.', NULL, NULL, '2025-03-31 21:26:08'),
-(74, 20, 'jeje', 'uploads/images/1743456666_IMG_4225.jpg', NULL, '2025-03-31 21:31:06');
+(74, 20, 'jeje', 'uploads/images/1743456666_IMG_4225.jpg', NULL, '2025-03-31 21:31:06'),
+(75, 1, 'historia💢', 'uploads/images/1748279034_IMG_0954.jpg', NULL, '2025-05-26 17:03:54');
 
 -- --------------------------------------------------------
 
@@ -328,7 +358,8 @@ INSERT INTO `private_messages` (`id`, `sender_id`, `receiver_id`, `message`, `ti
 (43, 1, 19, 'porfa', '2025-03-31 15:45:22', 1),
 (44, 1, 19, 'joder macho', '2025-03-31 15:45:32', 1),
 (45, 19, 1, 'siii siii', '2025-03-31 15:45:42', 1),
-(46, 19, 15, 'holaaaaaa', '2025-03-31 15:49:04', 0);
+(46, 19, 15, 'holaaaaaa', '2025-03-31 15:49:04', 0),
+(47, 14, 1, 'holaa', '2025-05-26 18:09:52', 1);
 
 -- --------------------------------------------------------
 
@@ -366,12 +397,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_image`, `created_at`, `profile_picture`) VALUES
-(1, 'imberto', 'albertotriv03@gmail.com', '$2y$10$qGpAcTILtbrp4uVjX7CyfuSH1svYPz1mFwp9Jpx62Mrp6iMpK9zNO', NULL, NULL, '2024-10-03 13:42:30', 'uploads/144DD9A2-F42E-4C7C-B89B-660A2339F521 (1).JPG'),
-(2, 'pelaaf', 'pelayo@gmail.com', 'hashed_password1', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
-(3, 'mandestroyer56', 'user1@example.com', 'hashed_password2', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
-(4, 'osbo777', 'user2@example.com', 'hashed_password3', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
-(5, 'bloste', 'user3@example.com', 'hashed_password4', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
-(6, 'canadre', 'user4@example.com', 'hashed_password5', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default.png'),
+(1, 'imberto', 'albertotriv03@gmail.com', '$2y$10$87FATs66zepCibthINuY9u8Cz.1hkxQrbnWX9l3zwhc7Zv3Bbeb9S', NULL, NULL, '2024-10-03 13:42:30', 'uploads/144DD9A2-F42E-4C7C-B89B-660A2339F521 (1).JPG'),
+(2, 'pelaaf', 'pelayo@gmail.com', 'hashed_password1', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default-avatar.png'),
+(3, 'mandestroyer56', 'user1@example.com', 'hashed_password2', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default-avatar.png'),
+(4, 'osbo777', 'user2@example.com', 'hashed_password3', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default-avatar.png'),
+(5, 'bloste', 'user3@example.com', 'hashed_password4', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default-avatar.png'),
+(6, 'canadre', 'user4@example.com', 'hashed_password5', NULL, NULL, '2024-10-03 14:23:47', 'uploads/default-avatar.png'),
 (14, 'test', 'test@test.com', '$2y$10$MVoYSHS/g2qnsdAvhIs.2u.pBc2VvfcykCyjVIFz.RSP3/6aB./Me', NULL, NULL, '2025-01-23 13:18:35', 'uploads/0eda11ba-5822-4429-95e4-54530b8c1dd1.jpg'),
 (15, 'rodrii12', 'rodrii12@gmail.com', '$2y$10$4JzZpK4iU3/f.OwvBLjIZepg1oksukDo8o1xhNEIEhMKRE1ZL18TS', NULL, NULL, '2025-03-26 14:15:05', 'uploads/FOTO.jpg'),
 (19, 'PatitoGames', 'patitoyt@gmail.com', '$2y$10$Vtao6KmzXFaQ19dsMuzucOPvM6OBORznfOFFUHon5JOYqX0wapdf2', NULL, NULL, '2025-03-31 13:41:56', 'uploads/images.jpg'),
@@ -436,6 +467,15 @@ ALTER TABLE `likes`
   ADD KEY `post_id` (`post_id`);
 
 --
+-- Indices de la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `idx_token` (`token`),
+  ADD KEY `idx_expires` (`expires_at`);
+
+--
 -- Indices de la tabla `posts`
 --
 ALTER TABLE `posts`
@@ -478,13 +518,13 @@ ALTER TABLE `api_tokens`
 -- AUTO_INCREMENT de la tabla `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT de la tabla `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `exercises`
@@ -496,25 +536,31 @@ ALTER TABLE `exercises`
 -- AUTO_INCREMENT de la tabla `friends`
 --
 ALTER TABLE `friends`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT de la tabla `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+
+--
+-- AUTO_INCREMENT de la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT de la tabla `private_messages`
 --
 ALTER TABLE `private_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT de la tabla `progress`
@@ -578,6 +624,12 @@ ALTER TABLE `friends`
 ALTER TABLE `likes`
   ADD CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD CONSTRAINT `password_reset_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `posts`

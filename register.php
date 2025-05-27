@@ -135,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         <div class="register-footer">
             <p>¿Ya tienes cuenta? <a href="index.php">Inicia sesión aquí</a></p>
-            <p>Al registrarte, aceptas nuestros <a href="#">Términos y Condiciones</a> y <a href="#">Política de Privacidad</a>.</p>
         </div>
     </div>
 
