@@ -543,7 +543,7 @@ $recommendedResult = $recommendedQuery->get_result();
             
             // Enviar solicitud AJAX
             $.ajax({
-                url: 'follow_ajax.php',
+                url: '/api/follow_ajax.php',
                 method: 'POST',
                 data: { 
                     follow_user_id: userId,
