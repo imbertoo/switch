@@ -1,0 +1,12 @@
+[build]
+builder = "nixpacks"
+
+[build.nixpacksConfig]
+providers = ["php"]
+
+[deploy]
+startCommand = "php -S 0.0.0.0:$PORT -t ."
+
+[variables]
+PHP_VERSION = "8.2"
+NIXPACKS_PHP_VERSION = "8.2"

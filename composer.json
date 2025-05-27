@@ -3,11 +3,11 @@
     "description": "Red social estilo Twitter/Instagram",
     "type": "project",
     "require": {
-        "php": "^8.2.12"
+        "php": "^8.2"
     },
     "config": {
         "platform": {
-            "php": "8.2.12"
+            "php": "8.2"
         }
     }
 }
