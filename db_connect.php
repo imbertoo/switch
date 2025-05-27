@@ -4,7 +4,7 @@
 // Variables de entorno (para producción en Vercel)
 $servername = getenv('DB_HOST') ?: 'sql7.freesqldatabase.com';
 $username = getenv('DB_USER') ?: 'sql7781528';
-$password = getenv('DB_PASS') ?: 'mtsRqPrmHH';
+$password = getenv('DB_PASS') ?: 'enelgmail';
 $dbname = getenv('DB_NAME') ?: 'sql7781528';
 $port = getenv('DB_PORT') ?: 3306;
 
