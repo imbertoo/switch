@@ -864,7 +864,7 @@ $recommendedResult = $recommendedQuery->get_result();
             
             // Enviar solicitud AJAX
             $.ajax({
-                url: 'follow_ajax.php',
+                url: '/api/follow_ajax.php',
                 method: 'POST',
                 data: { 
                     follow_user_id: userId,
@@ -1237,7 +1237,7 @@ $recommendedResult = $recommendedQuery->get_result();
             const postId = button.data('post-id');
             
             $.ajax({
-                url: 'like_ajax.php',
+                url: '/api/like_ajax.php',
                 method: 'POST',
                 data: { post_id: postId },
                 dataType: 'json',
@@ -1264,7 +1264,7 @@ $recommendedResult = $recommendedQuery->get_result();
             const commentId = button.data('comment-id');
             
             $.ajax({
-                url: 'comment_like_ajax.php',
+                url: '/api/comment_like_ajax.php',
                 method: 'POST',
                 data: { comment_id: commentId },
                 dataType: 'json',
@@ -1340,7 +1340,7 @@ $recommendedResult = $recommendedQuery->get_result();
             form.find('input, button').prop('disabled', true);
             
             $.ajax({
-                url: 'comment_ajax.php',
+                url: '/api/comment_ajax.php',
                 method: 'POST',
                 data: {
                     post_id: postId,
