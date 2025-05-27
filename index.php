@@ -1,4 +1,7 @@
 <?php
+header('Content-Type: text/html; charset=UTF-8');
+header('X-Content-Type-Options: nosniff');
+
 session_start();
 require_once 'db_connect.php'; 
 
